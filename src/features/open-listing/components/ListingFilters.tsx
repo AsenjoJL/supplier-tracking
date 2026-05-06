@@ -13,7 +13,7 @@ type ListingFiltersProps = {
 export function ListingFilters({ search, type, onSearchChange, onTypeChange }: ListingFiltersProps) {
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-      <Input placeholder="Search products..." value={search} onChange={(event) => onSearchChange(event.target.value)} className="max-w-sm" />
+      <Input placeholder="Search products..." value={search} onChange={(event) => onSearchChange(event.target.value)} className="w-full max-w-sm" />
       <div className="flex flex-wrap gap-2">
         <Button variant={type === "all" ? "default" : "outline"} size="sm" onClick={() => onTypeChange("all")}>All</Button>
         {PRODUCT_TYPES.filter((item) => item !== "other").map((item) => (

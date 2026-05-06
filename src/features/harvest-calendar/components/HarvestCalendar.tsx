@@ -29,24 +29,26 @@ export function HarvestCalendar() {
     <PageWrapper title="Harvest Calendar" description="Visualize planting events, forecast harvests, and crop timing.">
       <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
         <SectionCard title="Monthly Calendar" action={<CalendarNavigation monthDate={calendar.monthDate} monthLabel={calendar.monthLabel} onMonthChange={calendar.setMonthDate} />}>
-          <div className="grid grid-cols-7 gap-2">
-            {weekDays.map((day) => <div key={day} className="text-center text-xs font-semibold uppercase text-muted-foreground">{day}</div>)}
-            {cells.map((cell) => {
-              const events = cell.date ? calendar.eventsByDate.get(cell.date) ?? [] : [];
-              return (
-                <div key={cell.key} className={cn("min-h-28 rounded-md border bg-background p-2", cell.date === todayISO() && "border-leaf-500 bg-leaf-50")}>
-                  {cell.day ? <p className="mb-2 text-sm font-medium">{cell.day}</p> : null}
-                  <div className="space-y-1">
-                    {events.slice(0, 3).map((event) => (
-                      <div key={`${event.type}-${event.cropId}`} className={cn("truncate rounded px-1.5 py-1 text-xs", event.type === "planted" ? "bg-sky-100 text-sky-800" : "bg-amber-100 text-amber-900")}>
-                        {event.type === "planted" ? "Planted" : "Harvest"} · {event.label}
-                      </div>
-                    ))}
-                    {events.length > 3 ? <p className="text-xs text-muted-foreground">+{events.length - 3} more</p> : null}
+          <div className="overflow-x-auto">
+            <div className="grid min-w-[680px] grid-cols-7 gap-2">
+              {weekDays.map((day) => <div key={day} className="text-center text-xs font-semibold uppercase text-muted-foreground">{day}</div>)}
+              {cells.map((cell) => {
+                const events = cell.date ? calendar.eventsByDate.get(cell.date) ?? [] : [];
+                return (
+                  <div key={cell.key} className={cn("min-h-24 rounded-md border bg-background p-2 sm:min-h-28", cell.date === todayISO() && "border-leaf-500 bg-leaf-50")}>
+                    {cell.day ? <p className="mb-2 text-sm font-medium">{cell.day}</p> : null}
+                    <div className="space-y-1">
+                      {events.slice(0, 3).map((event) => (
+                        <div key={`${event.type}-${event.cropId}`} className={cn("truncate rounded px-1.5 py-1 text-xs", event.type === "planted" ? "bg-sky-100 text-sky-800" : "bg-amber-100 text-amber-900")}>
+                          {event.type === "planted" ? "Planted" : "Harvest"} · {event.label}
+                        </div>
+                      ))}
+                      {events.length > 3 ? <p className="text-xs text-muted-foreground">+{events.length - 3} more</p> : null}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </SectionCard>
         <div className="space-y-6">

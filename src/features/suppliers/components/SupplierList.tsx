@@ -54,7 +54,7 @@ export function SupplierList() {
       description="Manage grower partners, agri suppliers, and their linked inventory."
       action={<Button onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="h-4 w-4" />Add Supplier</Button>}
     >
-      <Input placeholder="Search suppliers..." value={search} onChange={(event) => setSearch(event.target.value)} className="max-w-md" />
+      <Input placeholder="Search suppliers..." value={search} onChange={(event) => setSearch(event.target.value)} className="w-full max-w-md" />
       <div className="grid gap-6 2xl:grid-cols-2">
         <SectionCard
           title="Vegetable Suppliers"

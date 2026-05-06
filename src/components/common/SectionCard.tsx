@@ -11,12 +11,12 @@ type SectionCardProps = {
 export function SectionCard({ title, description, action, children }: SectionCardProps) {
   return (
     <Card>
-      <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
-        <div>
+      <CardHeader className="flex-col items-start justify-between gap-3 space-y-0 sm:flex-row">
+        <div className="min-w-0">
           <CardTitle>{title}</CardTitle>
           {description ? <CardDescription>{description}</CardDescription> : null}
         </div>
-        {action}
+        {action ? <div className="w-full sm:w-auto sm:shrink-0 [&>*]:w-full sm:[&>*]:w-auto">{action}</div> : null}
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>

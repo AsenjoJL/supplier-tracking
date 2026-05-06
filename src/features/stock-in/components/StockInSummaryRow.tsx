@@ -20,7 +20,7 @@ export function StockInSummaryRow({ stockIn, product, supplierName, showEmptyTar
   const tarhaPercentLabel = Number.isInteger(tarhaPercent) ? `${tarhaPercent}%` : `${tarhaPercent.toFixed(2)}%`;
 
   return (
-    <div className="grid gap-2 border-b py-3 text-sm md:grid-cols-[1fr_1fr_0.7fr_1fr_1fr_auto] md:items-center">
+    <div className="grid gap-3 border-b py-3 text-sm sm:grid-cols-2 md:grid-cols-[1fr_1fr_0.7fr_1fr_1fr_auto] md:items-center">
       <div>
         <p className="font-medium">{product?.name ?? "Unknown product"}</p>
         <p className="text-xs text-muted-foreground">{supplierName ?? "Unknown supplier"}</p>
@@ -36,7 +36,7 @@ export function StockInSummaryRow({ stockIn, product, supplierName, showEmptyTar
       </div>
       <p className="font-medium">{formatCurrency(stockIn.finalPrice)}</p>
       {onEdit ? (
-        <Button variant="outline" size="sm" onClick={() => onEdit(stockIn)}>
+        <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => onEdit(stockIn)}>
           <Pencil className="h-3.5 w-3.5" />
           Edit
         </Button>

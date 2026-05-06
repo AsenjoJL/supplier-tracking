@@ -36,7 +36,7 @@ export function RecentTransactions({ transactions, products }: RecentTransaction
                 <p className="font-medium">{product?.name ?? "Unknown product"}</p>
                 <p className="text-sm text-muted-foreground">{transaction.purpose} · {formatDate(transaction.date)}</p>
               </div>
-              <p className={isIn ? "font-semibold text-leaf-700" : "font-semibold text-red-700"}>
+              <p className={isIn ? "shrink-0 text-sm font-semibold text-leaf-700 sm:text-base" : "shrink-0 text-sm font-semibold text-red-700 sm:text-base"}>
                 {isIn ? "+" : "-"}{transaction.qty} {transaction.unit}
               </p>
             </div>

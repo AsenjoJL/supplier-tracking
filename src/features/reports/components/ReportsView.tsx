@@ -19,7 +19,7 @@ export function ReportsView() {
     <PageWrapper title="Reports" description="Inventory, Tarha, harvest, and restock reports.">
       <ReportSummaryCards {...reports.summary} />
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
           <TabsTrigger value="inventory">Inventory</TabsTrigger>
           <TabsTrigger value="tarha">Tarha</TabsTrigger>
           <TabsTrigger value="harvest">Harvest</TabsTrigger>

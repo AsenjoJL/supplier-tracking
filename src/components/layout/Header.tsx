@@ -17,26 +17,37 @@ export function Header() {
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
   const toggleSidebar = useUIStore((state) => state.toggleSidebar);
+  const toggleMobileSidebar = useUIStore((state) => state.toggleMobileSidebar);
   const theme = useUIStore((state) => state.theme);
   const setTheme = useUIStore((state) => state.setTheme);
+
+  const handleSidebarToggle = () => {
+    const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+    if (isDesktop) {
+      toggleSidebar();
+      return;
+    }
+    toggleMobileSidebar();
+  };
+
   const handleSignOut = async () => {
     await signOut();
     queryClient.clear();
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur md:px-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} aria-label="Toggle sidebar">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-2 border-b bg-background/90 px-3 backdrop-blur sm:px-4 md:px-6">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        <Button variant="ghost" size="icon" onClick={handleSidebarToggle} aria-label="Toggle sidebar">
           <Menu className="h-5 w-5" />
         </Button>
-        <div>
-          <p className="text-sm font-semibold">Hazel AgriTrack</p>
-          <p className="text-xs text-muted-foreground">Supplier & farm inventory</p>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold">Hazel AgriTrack</p>
+          <p className="hidden truncate text-xs text-muted-foreground sm:block">Supplier & farm inventory</p>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" aria-label="Notifications">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <Button variant="ghost" size="icon" aria-label="Notifications" className="hidden sm:inline-flex">
           <Bell className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
@@ -44,9 +55,9 @@ export function Header() {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="w-9 px-0 sm:w-auto sm:max-w-64 sm:px-3">
               <UserCircle className="h-4 w-4" />
-              {user?.email ?? "User"}
+              <span className="hidden truncate sm:inline">{user?.email ?? "User"}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

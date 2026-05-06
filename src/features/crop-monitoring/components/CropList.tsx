@@ -49,7 +49,7 @@ export function CropList() {
       id: "actions",
       header: "Actions",
       cell: (row) => (
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => setDetail(row)}><Eye className="h-3.5 w-3.5" />Details</Button>
           <Button variant="outline" size="sm" onClick={() => setAllocating(row)}><Wheat className="h-3.5 w-3.5" />Input</Button>
           <Button variant="outline" size="sm" onClick={() => { setEditing(row); setFormOpen(true); }}><Pencil className="h-3.5 w-3.5" />Edit</Button>

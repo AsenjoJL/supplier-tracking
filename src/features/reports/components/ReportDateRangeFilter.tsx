@@ -10,7 +10,7 @@ type ReportDateRangeFilterProps = {
 
 export function ReportDateRangeFilter({ from, to, onFromChange, onToChange }: ReportDateRangeFilterProps) {
   return (
-    <div className="flex flex-wrap items-end gap-3">
+    <div className="grid gap-3 sm:grid-cols-2 md:flex md:flex-wrap md:items-end">
       <div className="space-y-2">
         <Label>From</Label>
         <Input type="date" value={from} onChange={(event) => onFromChange(event.target.value)} />

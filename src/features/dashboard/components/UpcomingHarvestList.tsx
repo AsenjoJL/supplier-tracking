@@ -19,12 +19,12 @@ export function UpcomingHarvestList({ crops }: UpcomingHarvestListProps) {
           {crops.map((crop) => {
             const days = daysBetween(todayISO(), crop.forecastHarvest);
             return (
-              <div key={crop.id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
-                <div>
+              <div key={crop.id} className="flex flex-col gap-3 border-b pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                   <p className="font-medium">{crop.name}</p>
                   <p className="text-sm text-muted-foreground">Planted {formatDate(crop.plantingDate)} · {crop.qty} plants</p>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 sm:text-right">
                   <p className="font-medium">{formatDate(crop.forecastHarvest)}</p>
                   <StatusBadge status={days <= 7 ? "out" : "low"} label={days <= 0 ? "Due" : `${days} days`} />
                 </div>

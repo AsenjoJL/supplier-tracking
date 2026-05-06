@@ -30,11 +30,11 @@ export function CropDetailView({ crop, open, onOpenChange }: CropDetailViewProps
         {crop ? (
           <div className="mt-6 space-y-6">
             <div className="rounded-md border p-4 text-sm">
-              <div className="flex justify-between py-2"><span className="text-muted-foreground">Planting date</span><span>{formatDate(crop.plantingDate)}</span></div>
-              <div className="flex justify-between py-2"><span className="text-muted-foreground">Forecast harvest</span><span>{formatDate(crop.forecastHarvest)}</span></div>
-              <div className="flex justify-between py-2"><span className="text-muted-foreground">Actual harvest</span><span>{formatDate(crop.actualHarvest)}</span></div>
-              <div className="flex justify-between py-2"><span className="text-muted-foreground">Quantity</span><span>{crop.qty} {crop.qtyUnit ?? "pcs"}</span></div>
-              <div className="flex justify-between py-2"><span className="text-muted-foreground">Status</span><StatusBadge status={crop.status} /></div>
+              <div className="flex flex-col gap-1 py-2 sm:flex-row sm:justify-between"><span className="text-muted-foreground">Planting date</span><span>{formatDate(crop.plantingDate)}</span></div>
+              <div className="flex flex-col gap-1 py-2 sm:flex-row sm:justify-between"><span className="text-muted-foreground">Forecast harvest</span><span>{formatDate(crop.forecastHarvest)}</span></div>
+              <div className="flex flex-col gap-1 py-2 sm:flex-row sm:justify-between"><span className="text-muted-foreground">Actual harvest</span><span>{formatDate(crop.actualHarvest)}</span></div>
+              <div className="flex flex-col gap-1 py-2 sm:flex-row sm:justify-between"><span className="text-muted-foreground">Quantity</span><span>{crop.qty} {crop.qtyUnit ?? "pcs"}</span></div>
+              <div className="flex flex-col gap-1 py-2 sm:flex-row sm:justify-between"><span className="text-muted-foreground">Status</span><StatusBadge status={crop.status} /></div>
             </div>
             <section>
               <h3 className="mb-3 text-lg">Allocated Inputs</h3>
@@ -43,7 +43,7 @@ export function CropDetailView({ crop, open, onOpenChange }: CropDetailViewProps
                   const product = products.data?.find((item) => item.id === allocation.productId);
                   return (
                     <div key={allocation.id} className="rounded-md border p-3">
-                      <div className="flex justify-between gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
                         <p className="font-medium">{product?.name ?? "Unknown input"}</p>
                         <StatusBadge status={allocation.purpose} />
                       </div>

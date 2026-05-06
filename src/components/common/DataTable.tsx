@@ -29,6 +29,7 @@ type DataTableProps<T> = {
 export function DataTable<T>({ data, columns, getRowId, pageSize = 10, emptyMessage = "No records found." }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState>(null);
   const [page, setPage] = useState(0);
+  const tableMinWidth = Math.max(760, columns.length * 150);
 
   const sorted = useMemo(() => {
     if (!sort) return data;
@@ -62,54 +63,82 @@ export function DataTable<T>({ data, columns, getRowId, pageSize = 10, emptyMess
 
   return (
     <div className="space-y-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column) => (
-              <TableHead key={column.id} className={column.className}>
-                <button
-                  type="button"
-                  className={cn("flex items-center gap-1", column.sortable ? "cursor-pointer" : "cursor-default")}
-                  onClick={() => toggleSort(column)}
+      <div className="space-y-3 md:hidden">
+        {visibleRows.length > 0 ? (
+          visibleRows.map((row) => (
+            <article key={getRowId(row)} className="rounded-md border bg-card p-3 shadow-sm">
+              {columns.map((column) => (
+                <div
+                  key={column.id}
+                  className={cn(
+                    "grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3 border-b py-2 text-sm last:border-0",
+                    column.id === "actions" && "grid-cols-1 gap-2",
+                  )}
                 >
-                  {column.header}
-                  {column.sortable ? SortIcon(column.id) : null}
-                </button>
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {visibleRows.length > 0 ? (
-            visibleRows.map((row) => (
-              <TableRow key={getRowId(row)}>
-                {columns.map((column) => (
-                  <TableCell key={column.id} className={column.className}>
-                    {column.cell(row)}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{column.header}</p>
+                  <div className="min-w-0">{column.cell(row)}</div>
+                </div>
+              ))}
+            </article>
+          ))
+        ) : (
+          <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+            {emptyMessage}
+          </div>
+        )}
+      </div>
+      <div className="hidden overflow-x-auto md:block">
+        <Table style={{ minWidth: tableMinWidth }}>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                {emptyMessage}
-              </TableCell>
+              {columns.map((column) => (
+                <TableHead key={column.id} className={column.className}>
+                  <button
+                    type="button"
+                    className={cn("flex items-center gap-1", column.sortable ? "cursor-pointer" : "cursor-default")}
+                    onClick={() => toggleSort(column)}
+                  >
+                    {column.header}
+                    {column.sortable ? SortIcon(column.id) : null}
+                  </button>
+                </TableHead>
+              ))}
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {visibleRows.length > 0 ? (
+              visibleRows.map((row) => (
+                <TableRow key={getRowId(row)}>
+                  {columns.map((column) => (
+                    <TableCell key={column.id} className={column.className}>
+                      {column.cell(row)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
       {pageCount > 1 ? (
-        <div className="flex items-center justify-end gap-2">
-          <span className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+          <span className="text-center text-sm text-muted-foreground sm:text-left">
             Page {page + 1} of {pageCount}
           </span>
-          <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((value) => Math.max(0, value - 1))}>
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" disabled={page + 1 >= pageCount} onClick={() => setPage((value) => Math.min(pageCount - 1, value + 1))}>
-            Next
-          </Button>
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((value) => Math.max(0, value - 1))}>
+              Previous
+            </Button>
+            <Button variant="outline" size="sm" disabled={page + 1 >= pageCount} onClick={() => setPage((value) => Math.min(pageCount - 1, value + 1))}>
+              Next
+            </Button>
+          </div>
         </div>
       ) : null}
     </div>

@@ -39,19 +39,19 @@ export function SupplierProfileHeader({
       <div className="h-28 bg-leaf-900" />
       <div className="px-5 pb-5">
         <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="flex items-end gap-4">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-lg border-4 border-background bg-background text-foreground shadow-sm">
-              <CircleUserRound className="h-16 w-16" strokeWidth={1.8} aria-hidden="true" />
+          <div className="flex min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-end sm:gap-4">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border-4 border-background bg-background text-foreground shadow-sm sm:h-24 sm:w-24">
+              <CircleUserRound className="h-14 w-14 sm:h-16 sm:w-16" strokeWidth={1.8} aria-hidden="true" />
             </div>
-            <div className="pb-1">
+            <div className="min-w-0 pb-1">
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <h2 className="font-serif text-3xl leading-none">{supplier.name}</h2>
+                <h2 className="break-words font-serif text-2xl leading-none sm:text-3xl">{supplier.name}</h2>
                 <StatusBadge status={supplier.status} />
               </div>
               <p className="text-sm text-muted-foreground">{SUPPLIER_KIND_LABELS[supplier.supplierKind ?? "vegetable"]}</p>
             </div>
           </div>
-          <div className={showCropMetrics ? "grid grid-cols-2 gap-2 text-sm md:grid-cols-4" : "grid grid-cols-2 gap-2 text-sm md:grid-cols-3"}>
+          <div className={showCropMetrics ? "grid w-full grid-cols-2 gap-2 text-sm md:w-auto md:grid-cols-4" : "grid w-full grid-cols-2 gap-2 text-sm md:w-auto md:grid-cols-3"}>
             <ProfileStat icon={Package} label="Products" value={String(productCount)} />
             {showCropMetrics ? <ProfileStat icon={Sprout} label="Active crops" value={String(activeCropCount)} /> : null}
             <ProfileStat icon={Warehouse} label="Stock" value={String(totalStock)} />

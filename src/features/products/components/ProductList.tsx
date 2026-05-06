@@ -85,7 +85,7 @@ export function ProductList() {
       id: "actions",
       header: "Actions",
       cell: (row) => (
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => { setEditing(row); setFormOpen(true); }}><Pencil className="h-3.5 w-3.5" />Edit</Button>
           <Button variant="destructive" size="sm" onClick={() => setDeleteId(row.id)}><Trash2 className="h-3.5 w-3.5" />Del</Button>
         </div>
@@ -105,7 +105,7 @@ export function ProductList() {
         <Button onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="h-4 w-4" />Add Product</Button>
       }
     >
-      <Input placeholder="Search products..." value={search} onChange={(event) => setSearch(event.target.value)} className="max-w-md" />
+      <Input placeholder="Search products..." value={search} onChange={(event) => setSearch(event.target.value)} className="w-full max-w-md" />
       {productSections.length > 0 ? (
         <div className="space-y-6">
           {productSections.map((section) => (
