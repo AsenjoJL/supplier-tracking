@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { stockOutService } from "@/features/stock-out/services/stockOutService";
+import { useRealtimeCollectionQuery } from "@/hooks/useRealtimeCollectionQuery";
 
 export function useStockOut() {
-  return useQuery({
+  return useRealtimeCollectionQuery({
     queryKey: queryKeys.stockOut.lists(),
     queryFn: stockOutService.list,
+    subscribe: stockOutService.subscribeList,
   });
 }

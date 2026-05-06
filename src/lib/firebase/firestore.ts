@@ -6,6 +6,7 @@ import {
   getDoc as getFirestoreDoc,
   getDocs as getFirestoreDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   serverTimestamp,
@@ -14,6 +15,7 @@ import {
   type DocumentData,
   type DocumentSnapshot,
   type QueryConstraint,
+  type Unsubscribe,
   type UpdateData,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
@@ -40,6 +42,24 @@ export async function getDocs<T extends object>(
     id: document.id,
     ...(document.data() as T),
   }));
+}
+
+export function subscribeDocs<T extends object>(
+  collectionName: string,
+  constraints: QueryConstraint[] = [],
+  onNext: (items: FirestoreDoc<T>[]) => void,
+  onError?: (error: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    query(collection(db, collectionName), ...constraints),
+    (snapshot) => {
+      onNext(snapshot.docs.map((document) => ({
+        id: document.id,
+        ...(document.data() as T),
+      })));
+    },
+    (error) => onError?.(error),
+  );
 }
 
 export async function getPaginatedDocs<T extends object>(

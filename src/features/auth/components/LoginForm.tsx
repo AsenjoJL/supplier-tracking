@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { hasFirebaseConfig } from "@/config/env";
@@ -84,11 +84,6 @@ export function LoginForm() {
           <Leaf className="h-5 w-5" />
         </div>
         <CardTitle className="font-serif text-3xl">{mode === "register" ? "Create account" : "Welcome back"}</CardTitle>
-        <CardDescription>
-          {mode === "register"
-            ? "Register with Firebase Auth to start managing farm inventory."
-            : "Sign in with your Firebase Auth account to manage farm inventory."}
-        </CardDescription>
       </CardHeader>
       <CardContent>
         {!hasFirebaseConfig ? (

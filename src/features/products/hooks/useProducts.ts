@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { productService } from "@/features/products/services/productService";
+import { useRealtimeCollectionQuery } from "@/hooks/useRealtimeCollectionQuery";
 
 export function useProducts() {
-  return useQuery({
+  return useRealtimeCollectionQuery({
     queryKey: queryKeys.products.lists(),
     queryFn: productService.list,
+    subscribe: productService.subscribeList,
   });
 }
