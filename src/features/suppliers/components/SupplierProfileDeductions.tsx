@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SupplierDeductionFormFields } from "@/features/suppliers/components/SupplierDeductionFormFields";
-import { buildSupplierDeductionPayload, isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
+import { buildSupplierDeductionPayload, formatSupplierInputDeductionDetail, isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
 import { supplierDeductionSchema } from "@/features/suppliers/schemas/supplier-deduction.schema";
 import type { SupplierDeduction, SupplierDeductionFormValues } from "@/features/suppliers/types/supplier-deduction.types";
 import { SUPPLIER_DEDUCTION_STATUS_LABELS, SUPPLIER_DEDUCTION_TYPE_LABELS, SUPPLIER_DEDUCTION_TYPES } from "@/lib/constants";
@@ -145,7 +145,7 @@ export function SupplierProfileDeductions({
                   </div>
                   {isSupplierInputDeductionType(deduction.type) ? (
                     <p className="text-sm text-muted-foreground">
-                      {deduction.inputProductName || "Input product"} · {deduction.inputQty ?? 0} {deduction.inputUnit || "unit"} x {formatCurrency(deduction.inputUnitPrice ?? 0)}
+                      {deduction.inputProductName || "Input product"} · {formatSupplierInputDeductionDetail(deduction.type, deduction.inputQty ?? 0, deduction.inputUnit || "", deduction.inputUnitPrice ?? 0)}
                     </p>
                   ) : null}
                   <p className="text-sm text-muted-foreground">{formatDate(deduction.date)}</p>

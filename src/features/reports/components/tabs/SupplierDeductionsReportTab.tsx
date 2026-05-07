@@ -1,7 +1,7 @@
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import type { useReports } from "@/features/reports/hooks/useReports";
-import { isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
+import { getSupplierDeductionInputFieldConfig, isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
 import { SUPPLIER_DEDUCTION_STATUS_LABELS, SUPPLIER_DEDUCTION_TYPE_LABELS } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -14,10 +14,10 @@ export function SupplierDeductionsReportTab({ rows }: { rows: SupplierDeductionR
     { id: "type", header: "Type", cell: (row) => SUPPLIER_DEDUCTION_TYPE_LABELS[row.deduction.type] },
     { id: "product", header: "Input Product", cell: (row) => isSupplierInputDeductionType(row.deduction.type) ? row.deduction.inputProductName || "Input product" : "—" },
     {
-      id: "quantity",
-      header: "Quantity",
+      id: "measure",
+      header: "Measure",
       cell: (row) => isSupplierInputDeductionType(row.deduction.type)
-        ? `${row.deduction.inputQty ?? 0} ${row.deduction.inputUnit || "unit"}`
+        ? `${getSupplierDeductionInputFieldConfig(row.deduction.type).detailLabel}: ${row.deduction.inputQty ?? 0} ${row.deduction.inputUnit || getSupplierDeductionInputFieldConfig(row.deduction.type).defaultUnit}`
         : "—",
     },
     {

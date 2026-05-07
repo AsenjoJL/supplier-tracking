@@ -11,7 +11,7 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SupplierDeductionFormFields } from "@/features/suppliers/components/SupplierDeductionFormFields";
-import { buildSupplierDeductionPayload, isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
+import { buildSupplierDeductionPayload, formatSupplierInputDeductionDetail, isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
 import { supplierDeductionSchema } from "@/features/suppliers/schemas/supplier-deduction.schema";
 import type { SupplierDeduction, SupplierDeductionFormValues } from "@/features/suppliers/types/supplier-deduction.types";
 import type { Supplier } from "@/features/suppliers/types/supplier.types";
@@ -103,7 +103,7 @@ export function SupplierDeductionsView() {
       cell: (row) => isSupplierInputDeductionType(row.type) ? (
         <div className="text-sm">
           <p className="font-medium">{row.inputProductName || "Input product"}</p>
-          <p className="text-muted-foreground">{row.inputQty ?? 0} {row.inputUnit || "unit"} x {formatCurrency(row.inputUnitPrice ?? 0)}</p>
+          <p className="text-muted-foreground">{formatSupplierInputDeductionDetail(row.type, row.inputQty ?? 0, row.inputUnit || "", row.inputUnitPrice ?? 0)}</p>
         </div>
       ) : <span className="text-sm text-muted-foreground">—</span>,
     },

@@ -293,7 +293,7 @@ function DeductionCalculationGuide() {
         </div>
         <div className="rounded-md border bg-muted/20 p-3">
           <p className="font-medium">Farm input deductions</p>
-          <p className="mt-1 text-xs text-muted-foreground">Abuno, fertilizer, medicine, green solution, and seeds use quantity times unit price.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Abuno uses quantity. Fertilizer uses sacks, green solution and medicine use bottles, and seeds use packs, each multiplied by its saved price.</p>
         </div>
       </div>
     </SectionCard>

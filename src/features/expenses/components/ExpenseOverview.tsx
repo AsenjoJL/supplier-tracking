@@ -25,7 +25,7 @@ const escapeCsv = (value: string | number): string => {
 };
 
 const downloadCsv = (rows: ExpenseRow[]) => {
-  const headers = ["Date", "Type", "Category", "Item", "Crop", "Quantity", "Unit Price", "Total", "Supplier / Remarks"];
+  const headers = ["Date", "Type", "Category", "Item", "Crop", "Measure", "Unit Price", "Total", "Supplier / Remarks"];
   const csvRows = rows.map((row) => [
     row.date,
     EXPENSE_SOURCE_LABELS[row.source],
@@ -78,7 +78,7 @@ export function ExpenseOverview() {
     { id: "category", header: "Category", cell: (row) => EXPENSE_CATEGORY_LABELS[row.category] },
     { id: "item", header: "Item Name", cell: (row) => <p className="font-medium">{row.itemName}</p> },
     { id: "crop", header: "Crop", cell: (row) => row.cropName },
-    { id: "qty", header: "Qty", cell: (row) => row.qtyLabel },
+    { id: "qty", header: "Measure", cell: (row) => row.qtyLabel },
     {
       id: "unitPrice",
       header: "Unit Price",

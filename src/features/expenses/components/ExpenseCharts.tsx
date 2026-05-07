@@ -256,7 +256,7 @@ function ExpenseGuide() {
       <div className="grid gap-3 text-sm md:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
         <GuideItem title="From Stock In" text="Purchases are recorded from stock-in transaction final prices." />
         <GuideItem title="From Vegetables" text="Allocated crop inputs are valued from the linked product unit price." />
-        <GuideItem title="Supplier Deductions" text="Cash and loan deductions use the saved amount. Farm input deductions calculate quantity times unit price from supplier profiles." />
+        <GuideItem title="Supplier Deductions" text="Cash and loan deductions use the saved amount. Farm input deductions use the correct measure for the selected input type times its price." />
         <GuideItem title="Manual Expenses" text="Labor, transportation, utilities, and other non-inventory costs are added manually." />
       </div>
     </SectionCard>

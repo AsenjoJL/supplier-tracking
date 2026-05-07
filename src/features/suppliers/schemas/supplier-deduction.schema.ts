@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { getSupplierDeductionInputFieldConfig } from "@/features/suppliers/lib/supplierDeductionUtils";
+import type { SupplierDeductionInputType } from "@/features/suppliers/types/supplier-deduction.types";
 import { SUPPLIER_DEDUCTION_INPUT_TYPES, SUPPLIER_DEDUCTION_STATUSES, SUPPLIER_DEDUCTION_TYPES } from "@/lib/constants";
 
 const inputDeductionTypes = SUPPLIER_DEDUCTION_INPUT_TYPES as readonly string[];
@@ -9,7 +11,7 @@ export const supplierDeductionSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than zero"),
   inputProductId: z.string(),
   inputProductName: z.string(),
-  inputQty: z.coerce.number().min(0, "Quantity cannot be negative"),
+  inputQty: z.coerce.number().min(0, "Value cannot be negative"),
   inputUnit: z.string(),
   inputUnitPrice: z.coerce.number().min(0, "Unit price cannot be negative"),
   date: z.string().min(1, "Date is required"),
@@ -17,6 +19,8 @@ export const supplierDeductionSchema = z.object({
   remarks: z.string(),
 }).superRefine((values, context) => {
   if (!inputDeductionTypes.includes(values.type)) return;
+
+  const fieldConfig = getSupplierDeductionInputFieldConfig(values.type as SupplierDeductionInputType);
 
   if (!values.inputProductId) {
     context.addIssue({
@@ -30,7 +34,7 @@ export const supplierDeductionSchema = z.object({
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["inputQty"],
-      message: "Quantity must be greater than zero",
+      message: `${fieldConfig.measureErrorLabel} must be greater than zero`,
     });
   }
 

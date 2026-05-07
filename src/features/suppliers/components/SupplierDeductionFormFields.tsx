@@ -13,7 +13,7 @@ import {
 } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
-import { computeSupplierInputDeductionAmount, isSupplierInputDeductionType } from "../lib/supplierDeductionUtils";
+import { computeSupplierInputDeductionAmount, getSupplierDeductionInputFieldConfig, isSupplierInputDeductionType } from "../lib/supplierDeductionUtils";
 
 type SupplierDeductionFormFieldsProps = {
   form: UseFormReturn<SupplierDeductionFormValues>;
@@ -36,6 +36,7 @@ export function SupplierDeductionFormFields({
   const selectedAmount = usesInputDeduction
     ? computeSupplierInputDeductionAmount(inputQty, inputUnitPrice)
     : Number(form.watch("amount") || 0);
+  const inputFieldConfig = usesInputDeduction ? getSupplierDeductionInputFieldConfig(selectedType) : null;
   const selectableInputProducts = useMemo(
     () => (products.data ?? []).filter((product) => usesInputDeduction && product.type === selectedType),
     [products.data, selectedType, usesInputDeduction],
@@ -73,7 +74,7 @@ export function SupplierDeductionFormFields({
     form.setValue("inputProductId", "", { shouldDirty: true, shouldValidate: true });
     form.setValue("inputProductName", "", { shouldDirty: true });
     form.setValue("inputQty", 0, { shouldDirty: true, shouldValidate: true });
-    form.setValue("inputUnit", "Kilo", { shouldDirty: true, shouldValidate: true });
+    form.setValue("inputUnit", getSupplierDeductionInputFieldConfig(type).defaultUnit, { shouldDirty: true, shouldValidate: true });
     form.setValue("inputUnitPrice", 0, { shouldDirty: true, shouldValidate: true });
   };
 
@@ -88,9 +89,12 @@ export function SupplierDeductionFormFields({
 
   const applyInputProduct = (productId: string) => {
     const product = selectableInputProducts.find((item) => item.id === productId);
+    const defaultUnit = isSupplierInputDeductionType(selectedType)
+      ? getSupplierDeductionInputFieldConfig(selectedType).defaultUnit
+      : "";
     form.setValue("inputProductId", productId, { shouldDirty: true, shouldValidate: true });
     form.setValue("inputProductName", product?.name ?? "", { shouldDirty: true });
-    form.setValue("inputUnit", product?.unit ?? "", { shouldDirty: true });
+    form.setValue("inputUnit", defaultUnit || product?.unit || "", { shouldDirty: true });
     form.setValue("inputUnitPrice", product ? product.finalPrice ?? product.price : 0, { shouldDirty: true, shouldValidate: true });
   };
 
@@ -145,7 +149,7 @@ export function SupplierDeductionFormFields({
             {form.formState.errors.inputProductId ? <p className="text-sm text-destructive">{form.formState.errors.inputProductId.message}</p> : null}
           </div>
           <div className="space-y-2">
-            <Label>Unit</Label>
+            <Label>{inputFieldConfig?.unitLabel ?? "Unit"}</Label>
             <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm" {...form.register("inputUnit")}>
               {unitOptions.map((unit) => (
                 <option key={unit} value={unit}>{unit}</option>
@@ -159,17 +163,17 @@ export function SupplierDeductionFormFields({
         {usesInputDeduction ? (
           <>
             <div className="space-y-2">
-              <Label>Quantity</Label>
+              <Label>{inputFieldConfig?.measureLabel ?? "Quantity"}</Label>
               <Input type="number" step="0.01" {...form.register("inputQty")} />
               {form.formState.errors.inputQty ? <p className="text-sm text-destructive">{form.formState.errors.inputQty.message}</p> : null}
             </div>
             <div className="space-y-2">
-              <Label>Unit price</Label>
+              <Label>{inputFieldConfig?.unitPriceLabel ?? "Unit price"}</Label>
               <Input type="number" step="0.01" {...form.register("inputUnitPrice")} />
               {form.formState.errors.inputUnitPrice ? <p className="text-sm text-destructive">{form.formState.errors.inputUnitPrice.message}</p> : null}
             </div>
             <div className="space-y-2">
-              <Label>Calculated amount</Label>
+              <Label>{inputFieldConfig?.calculatedAmountLabel ?? "Calculated amount"}</Label>
               <div className="flex h-9 items-center rounded-md border bg-muted/30 px-3 text-sm font-semibold text-red-700">
                 {formatCurrency(selectedAmount)}
               </div>
