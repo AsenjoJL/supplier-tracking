@@ -133,7 +133,7 @@ export function SupplierDeductionsView() {
   return (
     <PageWrapper
       title="Deductions"
-      description="Track supplier cash advances, loans, transport, packaging, and other deductions."
+      description="Track supplier cash advances, loans, farm input deductions, transport, packaging, and other deductions."
       action={<Button onClick={() => openForm(null)}><Plus className="h-4 w-4" />Add Deduction</Button>}
     >
       <div className="grid gap-4 md:grid-cols-2">

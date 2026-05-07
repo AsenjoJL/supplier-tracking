@@ -48,6 +48,20 @@ export function SupplierProfileDeductions({
     defaultValues: defaults,
   });
   const pending = mutations.createDeduction.isPending || mutations.updateDeduction.isPending || mutations.settleDeduction.isPending;
+  const deductionTypeSummary = useMemo(
+    () => SUPPLIER_DEDUCTION_TYPES
+      .map((type) => {
+        const records = deductions.filter((deduction) => deduction.type === type);
+
+        return {
+          type,
+          count: records.length,
+          total: records.reduce((sum, deduction) => sum + deduction.amount, 0),
+        };
+      })
+      .filter((item) => item.count > 0),
+    [deductions],
+  );
 
   const settleDeduction = (deduction: FirestoreDoc<SupplierDeduction>) => {
     mutations.settleDeduction.mutate(deduction.id);
@@ -78,7 +92,7 @@ export function SupplierProfileDeductions({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="font-serif text-xl">Supplier Deductions</h3>
-          <p className="text-sm text-muted-foreground">Cash advances and other deductions connected to this supplier.</p>
+          <p className="text-sm text-muted-foreground">Cash advances, farm input deductions, and other deductions connected to this supplier.</p>
         </div>
         <Button
           type="button"
@@ -96,6 +110,17 @@ export function SupplierProfileDeductions({
         <SummaryBox label="Open deductions" value={formatCurrency(openTotal)} />
         <SummaryBox label="Settled deductions" value={formatCurrency(settledTotal)} />
       </div>
+      {deductionTypeSummary.length > 0 ? (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {deductionTypeSummary.map((item) => (
+            <SummaryBox
+              key={item.type}
+              label={`${SUPPLIER_DEDUCTION_TYPE_LABELS[item.type]} (${item.count})`}
+              value={formatCurrency(item.total)}
+            />
+          ))}
+        </div>
+      ) : null}
       {deductions.length > 0 ? (
         <div className="space-y-2">
           {deductions.map((deduction) => (

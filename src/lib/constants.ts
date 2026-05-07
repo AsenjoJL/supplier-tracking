@@ -21,6 +21,7 @@ export const SUPPLIER_KINDS = ["vegetable"] as const;
 export const EXPENSE_CATEGORIES = [
   "cashAdvance",
   "loan",
+  "abuno",
   "fertilizer",
   "medicine",
   "greenSolution",
@@ -81,6 +82,7 @@ export const PRODUCT_TYPE_LABELS: Record<(typeof PRODUCT_TYPES)[number], string>
 export const EXPENSE_CATEGORY_LABELS: Record<(typeof EXPENSE_CATEGORIES)[number], string> = {
   cashAdvance: "Cash Advance",
   loan: "Loan",
+  abuno: "Abuno",
   fertilizer: "Fertilizer",
   medicine: "Medicine",
   greenSolution: "Green Solutions",
@@ -101,11 +103,27 @@ export const EXPENSE_SOURCE_LABELS: Record<(typeof EXPENSE_SOURCES)[number], str
   tarha: "Tarha / Losses",
 };
 
-export const SUPPLIER_DEDUCTION_TYPES = ["cashAdvance", "loan", "transport", "packaging", "others"] as const;
+export const SUPPLIER_DEDUCTION_TYPES = [
+  "cashAdvance",
+  "loan",
+  "abuno",
+  "fertilizer",
+  "medicine",
+  "greenSolution",
+  "seeds",
+  "transport",
+  "packaging",
+  "others",
+] as const;
 
 export const SUPPLIER_DEDUCTION_TYPE_LABELS: Record<(typeof SUPPLIER_DEDUCTION_TYPES)[number], string> = {
   cashAdvance: "Cash Advance",
   loan: "Loan",
+  abuno: "Abuno",
+  fertilizer: "Fertilizer",
+  medicine: "Medicine",
+  greenSolution: "Green Solution",
+  seeds: "Seeds",
   transport: "Transport",
   packaging: "Packaging",
   others: "Others",

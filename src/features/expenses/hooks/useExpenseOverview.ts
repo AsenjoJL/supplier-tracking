@@ -53,12 +53,13 @@ const trendPercent = (current: number, previous: number): number => {
 };
 
 const productTypeToExpenseCategory = (type: ProductType): ExpenseCategory => {
+  if (type === "abuno") return "abuno";
   if (type === "fertilizer" || type === "medicine" || type === "greenSolution" || type === "seeds") return type;
-  if (type === "abuno") return "fertilizer";
   return "others";
 };
 
 const supplierDeductionTypeToExpenseCategory = (type: SupplierDeductionType): ExpenseCategory => {
+  if (type === "abuno" || type === "fertilizer" || type === "medicine" || type === "greenSolution" || type === "seeds") return type;
   if (type === "cashAdvance" || type === "loan" || type === "packaging" || type === "others") return type;
   if (type === "transport") return "transportation";
   return "others";
