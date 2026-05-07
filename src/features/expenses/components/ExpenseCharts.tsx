@@ -56,7 +56,7 @@ function ExpenseBreakdown({ rows, total }: { rows: BreakdownRow[]; total: number
   return (
     <SectionCard title="Expense Breakdown">
       {rows.length > 0 ? (
-        <div className="grid gap-5 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center lg:grid-cols-1 2xl:grid-cols-[11rem_minmax(0,1fr)]">
+        <div className="mx-auto grid w-full max-w-sm gap-5">
           <div className="relative mx-auto h-40 w-40 rounded-full" style={{ background: `conic-gradient(${gradient})` }}>
             <div className="absolute inset-6 flex flex-col items-center justify-center rounded-full bg-card text-center shadow-inner">
               <span className="text-xs text-muted-foreground">Total</span>
@@ -67,10 +67,12 @@ function ExpenseBreakdown({ rows, total }: { rows: BreakdownRow[]; total: number
             {rows.map((row, index) => {
               const percent = Math.round((row.value / Math.max(total, 1)) * 100);
               return (
-                <div key={row.source} className="grid grid-cols-[0.75rem_minmax(0,1fr)_auto] items-center gap-2 text-sm">
+                <div key={row.source} className="grid grid-cols-[0.75rem_minmax(0,1fr)] gap-x-2 text-sm">
                   <span className="h-3 w-3 rounded-full" style={{ backgroundColor: chartColors[index % chartColors.length] }} />
-                  <span className="truncate text-muted-foreground">{row.label}</span>
-                  <span className="font-medium">{formatCurrency(row.value)} ({percent}%)</span>
+                  <div className="min-w-0">
+                    <p className="truncate text-muted-foreground">{row.label}</p>
+                    <p className="break-words font-medium">{formatCurrency(row.value)} ({percent}%)</p>
+                  </div>
                 </div>
               );
             })}
