@@ -23,6 +23,10 @@ export const queryKeys = {
     all: ["crops"] as const,
     lists: () => [...queryKeys.crops.all, "list"] as const,
   },
+  expenses: {
+    all: ["expenses"] as const,
+    lists: () => [...queryKeys.expenses.all, "list"] as const,
+  },
   dashboard: {
     metrics: ["dashboard", "metrics"] as const,
   },

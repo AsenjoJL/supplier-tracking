@@ -1,4 +1,4 @@
-import { CalendarDays, ChartNoAxesCombined, ClipboardList, LayoutDashboard, Package, Sprout, Truck, Users, Wheat, Warehouse, X } from "lucide-react";
+import { CalendarDays, ChartNoAxesCombined, ClipboardList, LayoutDashboard, Package, ReceiptText, Sprout, Truck, Users, Wheat, Warehouse, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useDashboardMetrics } from "@/features/dashboard/hooks/useDashboardMetrics";
@@ -17,7 +17,8 @@ const links = [
   { to: "/crop-monitoring", label: "Crop Monitoring", icon: Wheat },
   { to: "/harvest-calendar", label: "Harvest Calendar", icon: CalendarDays },
   { to: "/tarha", label: "Tarha", icon: ClipboardList, section: "Quality" },
-  { to: "/reports", label: "Reports", icon: ChartNoAxesCombined, section: "Reports" },
+  { to: "/expenses", label: "Expenses", icon: ReceiptText, section: "Reports" },
+  { to: "/reports", label: "Reports", icon: ChartNoAxesCombined },
 ];
 
 export function Sidebar() {

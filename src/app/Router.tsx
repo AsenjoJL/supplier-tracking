@@ -14,6 +14,7 @@ const FarmInputsPage = lazy(() => import("@/pages/FarmInputsPage"));
 const CropMonitoringPage = lazy(() => import("@/pages/CropMonitoringPage"));
 const HarvestCalendarPage = lazy(() => import("@/pages/HarvestCalendarPage"));
 const TarhaPage = lazy(() => import("@/pages/TarhaPage"));
+const ExpensesPage = lazy(() => import("@/pages/ExpensesPage"));
 const ReportsPage = lazy(() => import("@/pages/ReportsPage"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
 
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
       { path: "crop-monitoring", element: withSuspense(<CropMonitoringPage />) },
       { path: "harvest-calendar", element: withSuspense(<HarvestCalendarPage />) },
       { path: "tarha", element: withSuspense(<TarhaPage />) },
+      { path: "expenses", element: withSuspense(<ExpensesPage />) },
       { path: "reports", element: withSuspense(<ReportsPage />) },
     ],
   },

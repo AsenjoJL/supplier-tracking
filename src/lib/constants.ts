@@ -18,6 +18,21 @@ export const CROP_QUANTITY_UNITS = ["pcs", "seedlings", "sachet", "tray", "pack"
 
 export const SUPPLIER_KINDS = ["vegetable", "farmInput", "both"] as const;
 
+export const EXPENSE_CATEGORIES = [
+  "fertilizer",
+  "medicine",
+  "greenSolution",
+  "seeds",
+  "labor",
+  "transportation",
+  "packaging",
+  "utilities",
+  "maintenance",
+  "others",
+] as const;
+
+export const EXPENSE_SOURCES = ["stockIn", "cropInput", "manual", "tarha"] as const;
+
 export const STOCK_OUT_PURPOSES = [
   "sold",
   "planting",
@@ -65,6 +80,26 @@ export const SUPPLIER_KIND_LABELS: Record<(typeof SUPPLIER_KINDS)[number], strin
   vegetable: "Vegetable Supplier",
   farmInput: "Farm Input Supplier",
   both: "Vegetable + Farm Input",
+};
+
+export const EXPENSE_CATEGORY_LABELS: Record<(typeof EXPENSE_CATEGORIES)[number], string> = {
+  fertilizer: "Fertilizer",
+  medicine: "Medicine",
+  greenSolution: "Green Solutions",
+  seeds: "Seeds",
+  labor: "Labor",
+  transportation: "Transportation",
+  packaging: "Packaging",
+  utilities: "Utilities",
+  maintenance: "Maintenance",
+  others: "Others",
+};
+
+export const EXPENSE_SOURCE_LABELS: Record<(typeof EXPENSE_SOURCES)[number], string> = {
+  stockIn: "From Stock In",
+  cropInput: "From Vegetables (Crop)",
+  manual: "Manual Expenses",
+  tarha: "Tarha / Losses",
 };
 
 export const STOCK_OUT_PURPOSE_LABELS: Record<(typeof STOCK_OUT_PURPOSES)[number], string> = {
