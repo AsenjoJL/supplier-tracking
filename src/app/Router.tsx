@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { AppShell } from "@/components/layout/AppShell";
-import { ProtectedRoute } from "@/features/auth";
+import { ProtectedRoute, PublicOnlyRoute } from "@/features/auth";
 
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const SuppliersPage = lazy(() => import("@/pages/SuppliersPage"));
@@ -23,7 +23,7 @@ const withSuspense = (node: React.ReactNode) => <Suspense fallback={<LoadingSpin
 export const router = createBrowserRouter([
   {
     path: "/login",
-    element: withSuspense(<LoginPage />),
+    element: <PublicOnlyRoute>{withSuspense(<LoginPage />)}</PublicOnlyRoute>,
   },
   {
     path: "/",
@@ -46,6 +46,7 @@ export const router = createBrowserRouter([
       { path: "tarha", element: withSuspense(<TarhaPage />) },
       { path: "expenses", element: withSuspense(<ExpensesPage />) },
       { path: "reports", element: withSuspense(<ReportsPage />) },
+      { path: "*", element: <Navigate to="/dashboard" replace /> },
     ],
   },
 ]);

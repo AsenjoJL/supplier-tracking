@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { withRateLimit } from "@/lib/rateLimit";
 import { supplierService } from "@/features/suppliers/services/supplierService";
 import type { SupplierFormValues } from "@/features/suppliers/types/supplier.types";
 
@@ -11,17 +12,17 @@ export function useSupplierMutations() {
   };
 
   const createSupplier = useMutation({
-    mutationFn: (payload: SupplierFormValues) => supplierService.create(payload),
+    mutationFn: withRateLimit<SupplierFormValues, string>("suppliers:create", (payload) => supplierService.create(payload)),
     onSuccess: invalidate,
   });
 
   const updateSupplier = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: SupplierFormValues }) => supplierService.update(id, payload),
+    mutationFn: withRateLimit<{ id: string; payload: SupplierFormValues }, void>("suppliers:update", ({ id, payload }) => supplierService.update(id, payload)),
     onSuccess: invalidate,
   });
 
   const deleteSupplier = useMutation({
-    mutationFn: (id: string) => supplierService.remove(id),
+    mutationFn: withRateLimit<string, void>("suppliers:delete", (id) => supplierService.remove(id)),
     onSuccess: invalidate,
   });
 

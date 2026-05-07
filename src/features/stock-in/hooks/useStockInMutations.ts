@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { stockInService } from "@/features/stock-in/services/stockInService";
 import type { StockIn, StockInFormValues, TarhaReason } from "@/features/stock-in/types/stock-in.types";
 import { queryKeys } from "@/lib/queryKeys";
+import { withRateLimit } from "@/lib/rateLimit";
 
 const calculateStockInPricing = (qty: number, unitPrice: number, tarhaPercent: number) => {
   const tarhaQty = Number(((qty * tarhaPercent) / 100).toFixed(2));
@@ -31,44 +32,47 @@ export function useStockInMutations() {
   };
 
   const createStockIn = useMutation({
-    mutationFn: (payload: StockInFormValues) => {
+    mutationFn: withRateLimit<StockInFormValues, string>("stock-in:create", (payload) => {
       const pricing = calculateStockInPricing(payload.qty, payload.originalPrice, payload.tarhaPercent);
 
       return stockInService.create({
         ...payload,
         ...pricing,
       });
-    },
+    }),
     onSuccess: invalidate,
   });
 
   const updateStockIn = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: StockInFormValues }) => {
+    mutationFn: withRateLimit<{ id: string; payload: StockInFormValues }, void>("stock-in:update", ({ id, payload }) => {
       const pricing = calculateStockInPricing(payload.qty, payload.originalPrice, payload.tarhaPercent);
 
       return stockInService.update(id, {
         ...payload,
         ...pricing,
       });
-    },
+    }),
     onSuccess: invalidate,
   });
 
   const updateTarha = useMutation({
-    mutationFn: ({ id, stockIn, tarhaQty, tarhaReason }: { id: string; stockIn: StockIn; tarhaQty: number; tarhaReason: TarhaReason | null }) => {
-      const pricing = calculateStockInPricingFromQty(stockIn.qty, tarhaQty, stockIn.originalPrice);
+    mutationFn: withRateLimit<{ id: string; stockIn: StockIn; tarhaQty: number; tarhaReason: TarhaReason | null }, void>(
+      "stock-in:tarha",
+      ({ id, stockIn, tarhaQty, tarhaReason }) => {
+        const pricing = calculateStockInPricingFromQty(stockIn.qty, tarhaQty, stockIn.originalPrice);
 
-      return stockInService.update(id, {
-        tarhaQty,
-        ...pricing,
-        tarhaReason,
-      });
-    },
+        return stockInService.update(id, {
+          tarhaQty,
+          ...pricing,
+          tarhaReason,
+        });
+      },
+    ),
     onSuccess: invalidate,
   });
 
   const deleteStockIn = useMutation({
-    mutationFn: (id: string) => stockInService.remove(id),
+    mutationFn: withRateLimit<string, void>("stock-in:delete", (id) => stockInService.remove(id)),
     onSuccess: invalidate,
   });
 

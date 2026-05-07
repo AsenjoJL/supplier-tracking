@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cropService } from "@/features/crop-monitoring/services/cropService";
 import type { CropFormValues } from "@/features/crop-monitoring/types/crop.types";
 import { queryKeys } from "@/lib/queryKeys";
+import { withRateLimit } from "@/lib/rateLimit";
 import { addDaysToISODate } from "@/lib/utils";
 
 export function useCropMutations() {
@@ -13,27 +14,29 @@ export function useCropMutations() {
   };
 
   const createCrop = useMutation({
-    mutationFn: (payload: CropFormValues) =>
+    mutationFn: withRateLimit<CropFormValues, string>("crops:create", (payload) =>
       cropService.create({
         ...payload,
         forecastHarvest: addDaysToISODate(payload.plantingDate, payload.daysToHarvest),
       }),
+    ),
     onSuccess: invalidate,
   });
 
   const updateCrop = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<CropFormValues> }) =>
+    mutationFn: withRateLimit<{ id: string; payload: Partial<CropFormValues> }, void>("crops:update", ({ id, payload }) =>
       cropService.update(id, {
         ...payload,
         ...(payload.plantingDate && payload.daysToHarvest
           ? { forecastHarvest: addDaysToISODate(payload.plantingDate, payload.daysToHarvest) }
           : {}),
       }),
+    ),
     onSuccess: invalidate,
   });
 
   const deleteCrop = useMutation({
-    mutationFn: (id: string) => cropService.remove(id),
+    mutationFn: withRateLimit<string, void>("crops:delete", (id) => cropService.remove(id)),
     onSuccess: invalidate,
   });
 

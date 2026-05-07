@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { productService } from "@/features/products/services/productService";
 import type { ProductFormValues } from "@/features/products/types/product.types";
 import { queryKeys } from "@/lib/queryKeys";
+import { withRateLimit } from "@/lib/rateLimit";
 import { computeTarhaPricing } from "@/lib/utils";
 
 const withTarhaPricing = (payload: ProductFormValues): ProductFormValues => {
@@ -28,22 +29,24 @@ export function useProductMutations() {
   };
 
   const createProduct = useMutation({
-    mutationFn: (payload: ProductFormValues) => productService.create(withTarhaPricing(payload)),
+    mutationFn: withRateLimit<ProductFormValues, string>("products:create", (payload) => productService.create(withTarhaPricing(payload))),
     onSuccess: invalidate,
   });
 
   const importProducts = useMutation({
-    mutationFn: (payloads: ProductFormValues[]) => productService.createMany(payloads.map(withTarhaPricing)),
+    mutationFn: withRateLimit<ProductFormValues[], string[]>("products:import", (payloads) => productService.createMany(payloads.map(withTarhaPricing))),
     onSuccess: invalidate,
   });
 
   const updateProduct = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: ProductFormValues }) => productService.update(id, withTarhaPricing(payload)),
+    mutationFn: withRateLimit<{ id: string; payload: ProductFormValues }, void>("products:update", ({ id, payload }) =>
+      productService.update(id, withTarhaPricing(payload)),
+    ),
     onSuccess: invalidate,
   });
 
   const deleteProduct = useMutation({
-    mutationFn: (id: string) => productService.remove(id),
+    mutationFn: withRateLimit<string, void>("products:delete", (id) => productService.remove(id)),
     onSuccess: invalidate,
   });
 

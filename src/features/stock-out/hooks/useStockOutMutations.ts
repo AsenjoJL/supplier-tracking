@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { stockOutService } from "@/features/stock-out/services/stockOutService";
 import type { StockOutFormValues } from "@/features/stock-out/types/stock-out.types";
 import { queryKeys } from "@/lib/queryKeys";
+import { withRateLimit } from "@/lib/rateLimit";
 
 export function useStockOutMutations() {
   const queryClient = useQueryClient();
@@ -13,12 +14,12 @@ export function useStockOutMutations() {
   };
 
   const createStockOut = useMutation({
-    mutationFn: (payload: StockOutFormValues) => stockOutService.create(payload),
+    mutationFn: withRateLimit<StockOutFormValues, string>("stock-out:create", (payload) => stockOutService.create(payload)),
     onSuccess: invalidate,
   });
 
   const deleteStockOut = useMutation({
-    mutationFn: (id: string) => stockOutService.remove(id),
+    mutationFn: withRateLimit<string, void>("stock-out:delete", (id) => stockOutService.remove(id)),
     onSuccess: invalidate,
   });
 

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { expenseService } from "@/features/expenses/services/expenseService";
 import type { ManualExpenseFormValues } from "@/features/expenses/types/expense.types";
 import { queryKeys } from "@/lib/queryKeys";
+import { withRateLimit } from "@/lib/rateLimit";
 
 export function useExpenseMutations() {
   const queryClient = useQueryClient();
@@ -11,17 +12,19 @@ export function useExpenseMutations() {
   };
 
   const createExpense = useMutation({
-    mutationFn: (payload: ManualExpenseFormValues) => expenseService.create(payload),
+    mutationFn: withRateLimit<ManualExpenseFormValues, string>("expenses:create", (payload) => expenseService.create(payload)),
     onSuccess: invalidate,
   });
 
   const updateExpense = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: ManualExpenseFormValues }) => expenseService.update(id, payload),
+    mutationFn: withRateLimit<{ id: string; payload: ManualExpenseFormValues }, void>("expenses:update", ({ id, payload }) =>
+      expenseService.update(id, payload),
+    ),
     onSuccess: invalidate,
   });
 
   const deleteExpense = useMutation({
-    mutationFn: (id: string) => expenseService.remove(id),
+    mutationFn: withRateLimit<string, void>("expenses:delete", (id) => expenseService.remove(id)),
     onSuccess: invalidate,
   });
 
