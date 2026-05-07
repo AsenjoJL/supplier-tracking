@@ -8,6 +8,7 @@ import type { ProductType } from "@/features/products/types/product.types";
 import { useStockIn } from "@/features/stock-in/hooks/useStockIn";
 import { useStockOut } from "@/features/stock-out/hooks/useStockOut";
 import { useSupplierDeductions } from "@/features/suppliers/hooks/useSupplierDeductions";
+import { isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import { EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORIES, EXPENSE_SOURCE_LABELS, EXPENSE_SOURCES, SUPPLIER_DEDUCTION_TYPE_LABELS } from "@/lib/constants";
 import { computeStockInPricing } from "@/lib/utils";
@@ -137,16 +138,19 @@ export function useExpenseOverview(range: ExpenseDateRange) {
       })),
       ...(supplierDeductions.data ?? []).map((deduction): ExpenseRow => {
         const supplier = supplierMap.get(deduction.supplierId);
+        const isInputDeduction = isSupplierInputDeductionType(deduction.type);
         return {
           id: `supplierDeduction-${deduction.id}`,
           date: deduction.date,
           source: "supplierDeduction",
           category: supplierDeductionTypeToExpenseCategory(deduction.type),
-          itemName: SUPPLIER_DEDUCTION_TYPE_LABELS[deduction.type],
+          itemName: isInputDeduction
+            ? deduction.inputProductName || SUPPLIER_DEDUCTION_TYPE_LABELS[deduction.type]
+            : SUPPLIER_DEDUCTION_TYPE_LABELS[deduction.type],
           cropId: "",
           cropName: "—",
-          qtyLabel: "—",
-          unitPrice: deduction.amount,
+          qtyLabel: isInputDeduction ? `${deduction.inputQty ?? 0} ${deduction.inputUnit || "unit"}` : "—",
+          unitPrice: isInputDeduction ? deduction.inputUnitPrice ?? 0 : deduction.amount,
           amount: deduction.amount,
           supplierOrRemarks: [supplier?.name ?? "Unknown supplier", deduction.remarks].filter(Boolean).join(" - "),
         };

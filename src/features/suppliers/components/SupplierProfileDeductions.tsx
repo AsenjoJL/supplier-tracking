@@ -6,9 +6,8 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SupplierDeductionFormFields } from "@/features/suppliers/components/SupplierDeductionFormFields";
+import { buildSupplierDeductionPayload, isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
 import { supplierDeductionSchema } from "@/features/suppliers/schemas/supplier-deduction.schema";
 import type { SupplierDeduction, SupplierDeductionFormValues } from "@/features/suppliers/types/supplier-deduction.types";
 import { SUPPLIER_DEDUCTION_STATUS_LABELS, SUPPLIER_DEDUCTION_TYPE_LABELS, SUPPLIER_DEDUCTION_TYPES } from "@/lib/constants";
@@ -27,6 +26,11 @@ const makeDefaults = (supplierId: string): SupplierDeductionFormValues => ({
   supplierId,
   type: "cashAdvance",
   amount: 0,
+  inputProductId: "",
+  inputProductName: "",
+  inputQty: 0,
+  inputUnit: "",
+  inputUnitPrice: 0,
   date: todayISO(),
   status: "open",
   remarks: "",
@@ -72,6 +76,11 @@ export function SupplierProfileDeductions({
       supplierId: editing.supplierId,
       type: editing.type,
       amount: editing.amount,
+      inputProductId: editing.inputProductId ?? "",
+      inputProductName: editing.inputProductName ?? "",
+      inputQty: editing.inputQty ?? 0,
+      inputUnit: editing.inputUnit ?? "",
+      inputUnitPrice: editing.inputUnitPrice ?? 0,
       date: editing.date,
       status: editing.status,
       remarks: editing.remarks,
@@ -79,12 +88,14 @@ export function SupplierProfileDeductions({
   }, [defaults, editing, form, open]);
 
   const submit = form.handleSubmit((values) => {
+    const payload = buildSupplierDeductionPayload(values);
+
     if (editing) {
-      mutations.updateDeduction.mutate({ id: editing.id, payload: values }, { onSuccess: () => setOpen(false) });
+      mutations.updateDeduction.mutate({ id: editing.id, payload }, { onSuccess: () => setOpen(false) });
       return;
     }
 
-    mutations.createDeduction.mutate(values, { onSuccess: () => setOpen(false) });
+    mutations.createDeduction.mutate(payload, { onSuccess: () => setOpen(false) });
   });
 
   return (
@@ -132,6 +143,11 @@ export function SupplierProfileDeductions({
                     <p className="font-medium">{SUPPLIER_DEDUCTION_TYPE_LABELS[deduction.type]}</p>
                     <StatusBadge status={deduction.status} label={SUPPLIER_DEDUCTION_STATUS_LABELS[deduction.status]} />
                   </div>
+                  {isSupplierInputDeductionType(deduction.type) ? (
+                    <p className="text-sm text-muted-foreground">
+                      {deduction.inputProductName || "Input product"} · {deduction.inputQty ?? 0} {deduction.inputUnit || "unit"} x {formatCurrency(deduction.inputUnitPrice ?? 0)}
+                    </p>
+                  ) : null}
                   <p className="text-sm text-muted-foreground">{formatDate(deduction.date)}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <p className="text-sm text-muted-foreground">{deduction.remarks || "—"}</p>
@@ -175,39 +191,7 @@ export function SupplierProfileDeductions({
             <DialogTitle>{editing ? "Edit Deduction" : "Add Deduction"}</DialogTitle>
           </DialogHeader>
           <form className="grid gap-4" onSubmit={submit}>
-            <input type="hidden" {...form.register("supplierId")} />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Type</Label>
-                <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm" {...form.register("type")}>
-                  {SUPPLIER_DEDUCTION_TYPES.map((type) => (
-                    <option key={type} value={type}>{SUPPLIER_DEDUCTION_TYPE_LABELS[type]}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label>Date</Label>
-                <Input type="date" {...form.register("date")} />
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Amount</Label>
-                <Input type="number" step="0.01" {...form.register("amount")} />
-                {form.formState.errors.amount ? <p className="text-sm text-destructive">{form.formState.errors.amount.message}</p> : null}
-              </div>
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm" {...form.register("status")}>
-                  <option value="open">Open</option>
-                  <option value="settled">Settled</option>
-                </select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Remarks</Label>
-              <Textarea {...form.register("remarks")} />
-            </div>
+            <SupplierDeductionFormFields form={form} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={pending}>{pending ? "Saving..." : "Save deduction"}</Button>

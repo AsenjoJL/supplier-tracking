@@ -116,6 +116,10 @@ export const SUPPLIER_DEDUCTION_TYPES = [
   "others",
 ] as const;
 
+export const SUPPLIER_DEDUCTION_MONEY_TYPES = ["cashAdvance", "loan", "transport", "packaging", "others"] as const;
+
+export const SUPPLIER_DEDUCTION_INPUT_TYPES = ["abuno", "fertilizer", "medicine", "greenSolution", "seeds"] as const;
+
 export const SUPPLIER_DEDUCTION_TYPE_LABELS: Record<(typeof SUPPLIER_DEDUCTION_TYPES)[number], string> = {
   cashAdvance: "Cash Advance",
   loan: "Loan",
