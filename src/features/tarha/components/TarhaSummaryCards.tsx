@@ -11,7 +11,7 @@ export function TarhaSummaryCards({ recordCount, totalDeductions }: TarhaSummary
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <MetricCard label="Tarha records" value={recordCount} icon={ClipboardList} tone="amber" />
-      <MetricCard label="Total deduction amount" value={formatCurrency(totalDeductions)} icon={Scale} tone="red" />
+      <MetricCard label="Total Tarha value" value={formatCurrency(totalDeductions)} icon={Scale} tone="red" />
     </div>
   );
 }

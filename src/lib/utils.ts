@@ -6,6 +6,7 @@ import type { FirestoreDoc } from "@/types/global.types";
 type StockInLike = {
   productId: string;
   qty: number;
+  tarhaQty?: number;
 };
 
 type StockOutLike = {
@@ -28,6 +29,27 @@ export const formatCurrency = (value: number): string =>
     maximumFractionDigits: 2,
   }).format(value);
 
+export const roundNumber = (value: number, decimals = 2): number => Number(value.toFixed(decimals));
+
+export const clampNumber = (value: number, min: number, max: number): number =>
+  Math.min(Math.max(Number.isFinite(value) ? value : 0, min), max);
+
+export const computeNetStockInQty = (qty: number, tarhaQty = 0): number =>
+  roundNumber(Math.max(0, qty - clampNumber(tarhaQty, 0, Math.max(qty, 0))));
+
+export const computeStockInPricing = (qty: number, unitPrice: number, tarhaQtyInput = 0) => {
+  const safeQty = Math.max(qty, 0);
+  const safeUnitPrice = Math.max(unitPrice, 0);
+  const tarhaQty = roundNumber(clampNumber(tarhaQtyInput, 0, safeQty));
+  const netQty = computeNetStockInQty(safeQty, tarhaQty);
+  const tarhaPercent = safeQty > 0 ? roundNumber((tarhaQty / safeQty) * 100) : 0;
+  const originalTotal = roundNumber(safeQty * safeUnitPrice);
+  const finalPrice = roundNumber(netQty * safeUnitPrice);
+  const deductionAmount = roundNumber(originalTotal - finalPrice);
+
+  return { tarhaQty, tarhaPercent, netQty, originalTotal, deductionAmount, finalPrice };
+};
+
 export const computeStockBalance = <TIn extends StockInLike, TOut extends StockOutLike>(
   productId: string,
   stockIns: FirestoreDoc<TIn>[],
@@ -35,7 +57,7 @@ export const computeStockBalance = <TIn extends StockInLike, TOut extends StockO
 ): number => {
   const totalIn = stockIns
     .filter((item) => item.productId === productId)
-    .reduce((sum, item) => sum + item.qty, 0);
+    .reduce((sum, item) => sum + computeNetStockInQty(item.qty, item.tarhaQty), 0);
   const totalOut = stockOuts
     .filter((item) => item.productId === productId)
     .reduce((sum, item) => sum + item.qty, 0);

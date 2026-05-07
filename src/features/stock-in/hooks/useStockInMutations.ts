@@ -3,24 +3,7 @@ import { stockInService } from "@/features/stock-in/services/stockInService";
 import type { StockIn, StockInFormValues, TarhaReason } from "@/features/stock-in/types/stock-in.types";
 import { queryKeys } from "@/lib/queryKeys";
 import { withRateLimit } from "@/lib/rateLimit";
-
-const calculateStockInPricing = (qty: number, unitPrice: number, tarhaPercent: number) => {
-  const tarhaQty = Number(((qty * tarhaPercent) / 100).toFixed(2));
-  const originalTotal = qty * unitPrice;
-  const deductionAmount = Number((originalTotal * (tarhaPercent / 100)).toFixed(2));
-  const finalPrice = Number(Math.max(0, originalTotal - deductionAmount).toFixed(2));
-
-  return { tarhaQty, deductionAmount, finalPrice };
-};
-
-const calculateStockInPricingFromQty = (qty: number, tarhaQty: number, unitPrice: number) => {
-  const tarhaPercent = qty > 0 ? Number(((tarhaQty / qty) * 100).toFixed(2)) : 0;
-  const originalTotal = qty * unitPrice;
-  const deductionAmount = Number((originalTotal * (tarhaPercent / 100)).toFixed(2));
-  const finalPrice = Number(Math.max(0, originalTotal - deductionAmount).toFixed(2));
-
-  return { tarhaPercent, deductionAmount, finalPrice };
-};
+import { computeStockInPricing } from "@/lib/utils";
 
 export function useStockInMutations() {
   const queryClient = useQueryClient();
@@ -33,7 +16,7 @@ export function useStockInMutations() {
 
   const createStockIn = useMutation({
     mutationFn: withRateLimit<StockInFormValues, string>("stock-in:create", (payload) => {
-      const pricing = calculateStockInPricing(payload.qty, payload.originalPrice, payload.tarhaPercent);
+      const pricing = computeStockInPricing(payload.qty, payload.originalPrice, payload.tarhaQty);
 
       return stockInService.create({
         ...payload,
@@ -45,7 +28,7 @@ export function useStockInMutations() {
 
   const updateStockIn = useMutation({
     mutationFn: withRateLimit<{ id: string; payload: StockInFormValues }, void>("stock-in:update", ({ id, payload }) => {
-      const pricing = calculateStockInPricing(payload.qty, payload.originalPrice, payload.tarhaPercent);
+      const pricing = computeStockInPricing(payload.qty, payload.originalPrice, payload.tarhaQty);
 
       return stockInService.update(id, {
         ...payload,
@@ -59,10 +42,9 @@ export function useStockInMutations() {
     mutationFn: withRateLimit<{ id: string; stockIn: StockIn; tarhaQty: number; tarhaReason: TarhaReason | null }, void>(
       "stock-in:tarha",
       ({ id, stockIn, tarhaQty, tarhaReason }) => {
-        const pricing = calculateStockInPricingFromQty(stockIn.qty, tarhaQty, stockIn.originalPrice);
+        const pricing = computeStockInPricing(stockIn.qty, stockIn.originalPrice, tarhaQty);
 
         return stockInService.update(id, {
-          tarhaQty,
           ...pricing,
           tarhaReason,
         });

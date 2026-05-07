@@ -5,7 +5,7 @@ import { useStockIn } from "@/features/stock-in/hooks/useStockIn";
 import { useStockOut } from "@/features/stock-out/hooks/useStockOut";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import { LOW_STOCK_THRESHOLD } from "@/lib/constants";
-import { computeStockBalance, todayISO } from "@/lib/utils";
+import { computeNetStockInQty, computeStockBalance, todayISO } from "@/lib/utils";
 
 export function useDashboardMetrics() {
   const suppliers = useSuppliers();
@@ -30,7 +30,7 @@ export function useDashboardMetrics() {
       ...(stockIns.data ?? []).map((item) => ({ ...item, movementType: "in" as const })),
       ...(stockOuts.data ?? []).map((item) => ({ ...item, movementType: "out" as const })),
     ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
-    const totalStockInUnits = (stockIns.data ?? []).reduce((sum, item) => sum + item.qty, 0);
+    const totalStockInUnits = (stockIns.data ?? []).reduce((sum, item) => sum + computeNetStockInQty(item.qty, item.tarhaQty), 0);
 
     return {
       activeSuppliers: (suppliers.data ?? []).filter((supplier) => supplier.status === "active").length,

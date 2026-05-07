@@ -7,7 +7,7 @@ import { useStockIn } from "@/features/stock-in/hooks/useStockIn";
 import type { StockIn } from "@/features/stock-in/types/stock-in.types";
 import { useStockOut } from "@/features/stock-out/hooks/useStockOut";
 import type { StockOut } from "@/features/stock-out/types/stock-out.types";
-import { computeStockBalance } from "@/lib/utils";
+import { computeNetStockInQty, computeStockBalance } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
 import { useSuppliers } from "./useSuppliers";
 
@@ -46,7 +46,7 @@ export function useSupplierDetail(supplierId: string | null) {
     const productStock: SupplierProductStock[] = linkedProducts.map((product) => {
       const stockInQty = (stockIns.data ?? [])
         .filter((item) => item.productId === product.id)
-        .reduce((sum, item) => sum + item.qty, 0);
+        .reduce((sum, item) => sum + computeNetStockInQty(item.qty, item.tarhaQty), 0);
       const stockOutQty = (stockOuts.data ?? [])
         .filter((item) => item.productId === product.id)
         .reduce((sum, item) => sum + item.qty, 0);

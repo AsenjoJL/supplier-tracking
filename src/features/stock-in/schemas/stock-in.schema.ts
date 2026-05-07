@@ -7,7 +7,7 @@ export const stockInSchema = z.object({
   qty: z.coerce.number().positive("Quantity must be greater than zero"),
   unit: z.string().min(1, "Unit is required"),
   originalPrice: z.coerce.number().min(0, "Unit price must be positive"),
-  tarhaPercent: z.coerce.number().int().min(0, "Tarha percent cannot be negative").max(20, "Tarha percent cannot exceed 20%"),
+  tarhaPercent: z.coerce.number().min(0, "Tarha percent cannot be negative").max(100, "Tarha percent cannot exceed 100%"),
   tarhaQty: z.coerce.number().min(0, "Tarha quantity cannot be negative"),
   deductionAmount: z.coerce.number().min(0, "Deduction amount cannot be negative"),
   tarhaReason: z.enum(TARHA_REASONS).nullable(),

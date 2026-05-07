@@ -46,7 +46,7 @@ export function ReportAnalytics({ analytics }: { analytics: ReportsAnalytics }) 
         <FastMovingItems rows={analytics.topFastMovingItems} />
         <DonutBreakdown
           title="Tarha / Losses by Reason"
-          description="Deduction value grouped by quality reason."
+          description="Tarha value grouped by quality reason."
           rows={analytics.tarhaByReason}
           centerLabel="Total"
           centerValue={formatShortCurrency(analytics.tarhaByReason.reduce((sum, row) => sum + row.value, 0))}

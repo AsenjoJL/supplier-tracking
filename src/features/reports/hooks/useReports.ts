@@ -14,7 +14,7 @@ import {
   TARHA_REASON_LABELS,
   TARHA_REASONS,
 } from "@/lib/constants";
-import { computeStockBalance } from "@/lib/utils";
+import { computeNetStockInQty, computeStockBalance, computeStockInPricing } from "@/lib/utils";
 
 const toISODate = (date: Date): string => format(date, "yyyy-MM-dd");
 
@@ -99,14 +99,16 @@ export function useReports(dateRange?: ReportDateRange) {
       return product?.finalPrice ?? product?.price ?? 0;
     };
     const getStockInValue = (item: (typeof allStockIns)[number]): number =>
-      item.finalPrice ?? Math.max(0, item.qty - item.tarhaQty) * item.originalPrice;
+      item.finalPrice ?? computeStockInPricing(item.qty, item.originalPrice, item.tarhaQty).finalPrice;
+    const getTarhaValue = (item: (typeof allStockIns)[number]): number =>
+      item.deductionAmount ?? computeStockInPricing(item.qty, item.originalPrice, item.tarhaQty).deductionAmount;
     const getStockOutValue = (item: (typeof allStockOuts)[number]): number =>
       item.qty * getProductUnitValue(item.productId);
     const inventoryValueAt = (date: string): number =>
       allProducts.reduce((sum, product) => {
         const totalIn = allStockIns
           .filter((item) => item.productId === product.id && item.date <= date)
-          .reduce((innerSum, item) => innerSum + item.qty, 0);
+          .reduce((innerSum, item) => innerSum + computeNetStockInQty(item.qty, item.tarhaQty), 0);
         const totalOut = allStockOuts
           .filter((item) => item.productId === product.id && item.date <= date)
           .reduce((innerSum, item) => innerSum + item.qty, 0);
@@ -115,7 +117,7 @@ export function useReports(dateRange?: ReportDateRange) {
       }, 0);
 
     const stockRows = allProducts.map((product) => {
-      const totalIn = periodStockIns.filter((item) => item.productId === product.id).reduce((sum, item) => sum + item.qty, 0);
+      const totalIn = periodStockIns.filter((item) => item.productId === product.id).reduce((sum, item) => sum + computeNetStockInQty(item.qty, item.tarhaQty), 0);
       const totalOut = periodStockOuts.filter((item) => item.productId === product.id).reduce((sum, item) => sum + item.qty, 0);
       const currentStock = computeStockBalance(product.id, stockInsToDate, stockOutsToDate);
       return {
@@ -138,10 +140,10 @@ export function useReports(dateRange?: ReportDateRange) {
     const previousStockOutValue = allStockOuts
       .filter((item) => isWithinRange(item.date, range.previousFrom, range.previousTo))
       .reduce((sum, item) => sum + getStockOutValue(item), 0);
-    const currentTarhaDeductions = tarhaRows.reduce((sum, item) => sum + (item.deductionAmount ?? item.tarhaQty * item.originalPrice), 0);
+    const currentTarhaDeductions = tarhaRows.reduce((sum, item) => sum + getTarhaValue(item), 0);
     const previousTarhaDeductions = allStockIns
       .filter((item) => item.tarhaQty > 0 && isWithinRange(item.date, range.previousFrom, range.previousTo))
-      .reduce((sum, item) => sum + (item.deductionAmount ?? item.tarhaQty * item.originalPrice), 0);
+      .reduce((sum, item) => sum + getTarhaValue(item), 0);
     const totalInventoryValue = stockRows.reduce((sum, row) => sum + row.inventoryValue, 0);
     const previousInventoryValue = inventoryValueAt(range.previousTo);
 
@@ -192,7 +194,7 @@ export function useReports(dateRange?: ReportDateRange) {
       const rowsByReason = tarhaRows.filter((row) => row.tarhaReason === reason);
       return {
         label: TARHA_REASON_LABELS[reason],
-        value: rowsByReason.reduce((sum, row) => sum + (row.deductionAmount ?? row.tarhaQty * row.originalPrice), 0),
+        value: rowsByReason.reduce((sum, row) => sum + getTarhaValue(row), 0),
         detail: `${rowsByReason.length} ${rowsByReason.length === 1 ? "record" : "records"}`,
       };
     }).filter((row) => row.value > 0);

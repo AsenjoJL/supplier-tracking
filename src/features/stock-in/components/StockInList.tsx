@@ -15,6 +15,7 @@ import type { StockIn, StockInFormValues } from "@/features/stock-in/types/stock
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import type { Supplier } from "@/features/suppliers/types/supplier.types";
 import { FARM_INPUT_TYPES } from "@/lib/constants";
+import { computeStockInPricing } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
 
 type StockInTableProps = {
@@ -36,7 +37,7 @@ const toStockInFormValues = (stockIn: FirestoreDoc<StockIn>): StockInFormValues 
   originalPrice: stockIn.originalPrice,
   tarhaPercent: stockIn.tarhaPercent ?? (stockIn.qty > 0 ? Number(((stockIn.tarhaQty / stockIn.qty) * 100).toFixed(2)) : 0),
   tarhaQty: stockIn.tarhaQty,
-  deductionAmount: stockIn.deductionAmount ?? Number((stockIn.tarhaQty * stockIn.originalPrice).toFixed(2)),
+  deductionAmount: stockIn.deductionAmount ?? computeStockInPricing(stockIn.qty, stockIn.originalPrice, stockIn.tarhaQty).deductionAmount,
   tarhaReason: stockIn.tarhaReason,
   purpose: stockIn.purpose,
   date: stockIn.date,

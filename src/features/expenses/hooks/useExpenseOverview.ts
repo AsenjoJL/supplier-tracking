@@ -9,6 +9,7 @@ import { useStockIn } from "@/features/stock-in/hooks/useStockIn";
 import { useStockOut } from "@/features/stock-out/hooks/useStockOut";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import { EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORIES, EXPENSE_SOURCE_LABELS, EXPENSE_SOURCES } from "@/lib/constants";
+import { computeStockInPricing } from "@/lib/utils";
 
 export type ExpenseDateRange = {
   from: string;
@@ -138,7 +139,7 @@ export function useExpenseOverview(range: ExpenseDateRange) {
             cropName: "—",
             qtyLabel: `${stockIn.tarhaQty} ${stockIn.unit}`,
             unitPrice: stockIn.originalPrice,
-            amount: stockIn.deductionAmount ?? stockIn.tarhaQty * stockIn.originalPrice,
+            amount: stockIn.deductionAmount ?? computeStockInPricing(stockIn.qty, stockIn.originalPrice, stockIn.tarhaQty).deductionAmount,
             supplierOrRemarks: stockIn.tarhaReason ?? "Quality deduction",
           };
         }),

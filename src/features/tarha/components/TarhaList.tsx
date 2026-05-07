@@ -4,7 +4,7 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useTarhaRecords } from "@/features/tarha/hooks/useTarhaRecords";
 import { TARHA_REASON_LABELS } from "@/lib/constants";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { computeStockInPricing, formatCurrency, formatDate } from "@/lib/utils";
 import { TarhaReasonGuide } from "./TarhaReasonGuide";
 import { TarhaSummaryCards } from "./TarhaSummaryCards";
 
@@ -12,13 +12,15 @@ type TarhaRow = ReturnType<typeof useTarhaRecords>["records"][number];
 
 export function TarhaList() {
   const tarha = useTarhaRecords();
+  const getTarhaValue = (row: TarhaRow): number =>
+    row.stockIn.deductionAmount ?? computeStockInPricing(row.stockIn.qty, row.stockIn.originalPrice, row.stockIn.tarhaQty).deductionAmount;
 
   const columns: DataTableColumn<TarhaRow>[] = [
     { id: "product", header: "Product", cell: (row) => <p className="font-medium">{row.product?.name ?? "Unknown product"}</p> },
     { id: "date", header: "Date", sortable: true, sortValue: (row) => row.stockIn.date, cell: (row) => formatDate(row.stockIn.date) },
     { id: "reason", header: "Reason", cell: (row) => row.stockIn.tarhaReason ? <StatusBadge status={row.stockIn.tarhaReason} label={TARHA_REASON_LABELS[row.stockIn.tarhaReason]} /> : "—" },
     { id: "qty", header: "Tarha Qty", cell: (row) => `${row.stockIn.tarhaQty} ${row.stockIn.unit}` },
-    { id: "deduction", header: "Deduction", cell: (row) => <span className="text-red-700">{formatCurrency(row.stockIn.tarhaQty * row.stockIn.originalPrice)}</span> },
+    { id: "deduction", header: "Tarha Value", cell: (row) => <span className="text-red-700">{formatCurrency(getTarhaValue(row))}</span> },
     { id: "final", header: "Final", cell: (row) => <span className="font-semibold text-leaf-700">{formatCurrency(row.stockIn.finalPrice)}</span> },
   ];
 

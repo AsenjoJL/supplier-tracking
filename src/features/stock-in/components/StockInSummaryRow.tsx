@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { Product } from "@/features/products/types/product.types";
 import type { StockIn } from "@/features/stock-in/types/stock-in.types";
 import { TARHA_REASON_LABELS } from "@/lib/constants";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { computeNetStockInQty, formatCurrency, formatDate } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
 
 type StockInSummaryRowProps = {
@@ -18,6 +18,7 @@ type StockInSummaryRowProps = {
 export function StockInSummaryRow({ stockIn, product, supplierName, showEmptyTarhaLabel = true, onEdit }: StockInSummaryRowProps) {
   const tarhaPercent = stockIn.tarhaPercent ?? (stockIn.qty > 0 && stockIn.tarhaQty > 0 ? Number(((stockIn.tarhaQty / stockIn.qty) * 100).toFixed(2)) : 0);
   const tarhaPercentLabel = Number.isInteger(tarhaPercent) ? `${tarhaPercent}%` : `${tarhaPercent.toFixed(2)}%`;
+  const netQty = computeNetStockInQty(stockIn.qty, stockIn.tarhaQty);
 
   return (
     <div className="grid gap-3 border-b py-3 text-sm sm:grid-cols-2 md:grid-cols-[1fr_1fr_0.7fr_1fr_1fr_auto] md:items-center">
@@ -26,7 +27,10 @@ export function StockInSummaryRow({ stockIn, product, supplierName, showEmptyTar
         <p className="text-xs text-muted-foreground">{supplierName ?? "Unknown supplier"}</p>
       </div>
       <p>{formatDate(stockIn.date)}</p>
-      <p className="font-semibold text-leaf-700">+{stockIn.qty} {stockIn.unit}</p>
+      <div>
+        <p className="font-semibold text-leaf-700">+{netQty} {stockIn.unit}</p>
+        {stockIn.tarhaQty > 0 ? <p className="text-xs text-muted-foreground">Received {stockIn.qty}</p> : null}
+      </div>
       <div>
         {stockIn.tarhaQty > 0 && stockIn.tarhaReason ? (
           <StatusBadge status={stockIn.tarhaReason} label={`${TARHA_REASON_LABELS[stockIn.tarhaReason]} · ${stockIn.tarhaQty} (${tarhaPercentLabel})`} />

@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import type { StockIn, TarhaReason } from "@/features/stock-in/types/stock-in.types";
 import { useTarhaQuickApply } from "@/features/open-listing/hooks/useTarhaQuickApply";
 import { TARHA_REASON_LABELS, TARHA_REASONS } from "@/lib/constants";
-import { formatCurrency } from "@/lib/utils";
+import { computeStockInPricing, formatCurrency } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
 
 type TarhaQuickButtonProps = {
@@ -22,7 +22,7 @@ export function TarhaQuickButton({ stockIn }: TarhaQuickButtonProps) {
 
   if (!stockIn) return <span className="text-sm text-muted-foreground">No stock-in</span>;
 
-  const finalPrice = Math.max(0, stockIn.qty - tarhaQty) * stockIn.originalPrice;
+  const pricing = computeStockInPricing(stockIn.qty, stockIn.originalPrice, tarhaQty);
 
   const submit = () => {
     updateTarha.mutate({ id: stockIn.id, stockIn, tarhaQty, tarhaReason: tarhaQty > 0 ? reason : null }, { onSuccess: () => setOpen(false) });
@@ -52,8 +52,9 @@ export function TarhaQuickButton({ stockIn }: TarhaQuickButtonProps) {
             </div>
             <div className="rounded-md border bg-muted/30 p-3 text-sm">
               <div className="flex justify-between"><span>Original qty</span><span>{stockIn.qty} {stockIn.unit}</span></div>
-              <div className="flex justify-between"><span>Tarha</span><StatusBadge status={reason ?? "ok"} label={`${tarhaQty} ${stockIn.unit}`} /></div>
-              <div className="mt-2 flex justify-between border-t pt-2 font-semibold"><span>Final price</span><span>{formatCurrency(finalPrice)}</span></div>
+              <div className="flex justify-between"><span>Tarha</span><StatusBadge status={reason ?? "ok"} label={`${pricing.tarhaQty} ${stockIn.unit}`} /></div>
+              <div className="flex justify-between"><span>Net qty</span><span>{pricing.netQty} {stockIn.unit}</span></div>
+              <div className="mt-2 flex justify-between border-t pt-2 font-semibold"><span>Final price</span><span>{formatCurrency(pricing.finalPrice)}</span></div>
             </div>
           </div>
           <DialogFooter>

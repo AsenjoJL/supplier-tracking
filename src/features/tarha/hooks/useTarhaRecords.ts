@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useStockIn } from "@/features/stock-in/hooks/useStockIn";
+import { computeStockInPricing } from "@/lib/utils";
 
 export function useTarhaRecords() {
   const stockIns = useStockIn();
@@ -19,7 +20,10 @@ export function useTarhaRecords() {
 
   return {
     records,
-    totalDeductions: records.reduce((sum, record) => sum + record.stockIn.tarhaQty * record.stockIn.originalPrice, 0),
+    totalDeductions: records.reduce((sum, record) => {
+      const pricing = computeStockInPricing(record.stockIn.qty, record.stockIn.originalPrice, record.stockIn.tarhaQty);
+      return sum + (record.stockIn.deductionAmount ?? pricing.deductionAmount);
+    }, 0),
     isLoading: stockIns.isLoading || products.isLoading,
   };
 }

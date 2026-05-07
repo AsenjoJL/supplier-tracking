@@ -134,6 +134,10 @@ export function StockInForm({ open, initialValues = null, pending = false, onOpe
                   form.setValue("productId", event.target.value, { shouldDirty: true, shouldValidate: true });
                   form.setValue("unit", product?.unit ?? "");
                   form.setValue("originalPrice", product?.price ?? 0);
+                  form.setValue("tarhaPercent", 0);
+                  form.setValue("tarhaQty", 0);
+                  form.setValue("deductionAmount", 0);
+                  form.setValue("tarhaReason", null);
                 }}
               >
                 <option value="">Select product</option>
