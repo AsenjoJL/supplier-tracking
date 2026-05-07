@@ -23,10 +23,15 @@ export function useSupplierDeductionMutations() {
     onSuccess: invalidate,
   });
 
+  const settleDeduction = useMutation({
+    mutationFn: withRateLimit<string, void>("supplier-deductions:settle", (id) => supplierDeductionService.settle(id)),
+    onSuccess: invalidate,
+  });
+
   const deleteDeduction = useMutation({
     mutationFn: withRateLimit<string, void>("supplier-deductions:delete", (id) => supplierDeductionService.remove(id)),
     onSuccess: invalidate,
   });
 
-  return { createDeduction, updateDeduction, deleteDeduction };
+  return { createDeduction, updateDeduction, settleDeduction, deleteDeduction };
 }

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { HandCoins, Pencil, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, HandCoins, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
@@ -47,7 +47,11 @@ export function SupplierProfileDeductions({
     resolver: zodResolver(supplierDeductionSchema),
     defaultValues: defaults,
   });
-  const pending = mutations.createDeduction.isPending || mutations.updateDeduction.isPending;
+  const pending = mutations.createDeduction.isPending || mutations.updateDeduction.isPending || mutations.settleDeduction.isPending;
+
+  const settleDeduction = (deduction: FirestoreDoc<SupplierDeduction>) => {
+    mutations.settleDeduction.mutate(deduction.id);
+  };
 
   useEffect(() => {
     form.reset(editing ? {
@@ -104,7 +108,15 @@ export function SupplierProfileDeductions({
                     <StatusBadge status={deduction.status} label={SUPPLIER_DEDUCTION_STATUS_LABELS[deduction.status]} />
                   </div>
                   <p className="text-sm text-muted-foreground">{formatDate(deduction.date)}</p>
-                  {deduction.remarks ? <p className="mt-1 text-sm text-muted-foreground">{deduction.remarks}</p> : null}
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <p className="text-sm text-muted-foreground">{deduction.remarks || "—"}</p>
+                    {deduction.status === "open" ? (
+                      <Button type="button" variant="outline" size="sm" onClick={() => settleDeduction(deduction)} disabled={mutations.settleDeduction.isPending}>
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Settle
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 md:justify-end">
                   <p className="mr-2 font-semibold text-red-700">{formatCurrency(deduction.amount)}</p>

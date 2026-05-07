@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { HandCoins, Pencil, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, HandCoins, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
@@ -64,7 +64,11 @@ export function SupplierDeductionsView() {
   );
   const openTotal = rows.filter((row) => row.status === "open").reduce((sum, row) => sum + row.amount, 0);
   const settledTotal = rows.filter((row) => row.status === "settled").reduce((sum, row) => sum + row.amount, 0);
-  const pending = mutations.createDeduction.isPending || mutations.updateDeduction.isPending;
+  const pending = mutations.createDeduction.isPending || mutations.updateDeduction.isPending || mutations.settleDeduction.isPending;
+
+  const settleDeduction = (deduction: FirestoreDoc<SupplierDeduction>) => {
+    mutations.settleDeduction.mutate(deduction.id);
+  };
 
   const openForm = (deduction: FirestoreDoc<SupplierDeduction> | null) => {
     setEditing(deduction);
@@ -88,7 +92,21 @@ export function SupplierDeductionsView() {
     { id: "date", header: "Date", sortable: true, sortValue: (row) => row.date, cell: (row) => formatDate(row.date) },
     { id: "amount", header: "Amount", sortable: true, sortValue: (row) => row.amount, cell: (row) => <span className="font-semibold text-red-700">{formatCurrency(row.amount)}</span> },
     { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} label={SUPPLIER_DEDUCTION_STATUS_LABELS[row.status]} /> },
-    { id: "remarks", header: "Remarks", cell: (row) => <span className="text-sm text-muted-foreground">{row.remarks || "—"}</span> },
+    {
+      id: "remarks",
+      header: "Remarks",
+      cell: (row) => (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">{row.remarks || "—"}</span>
+          {row.status === "open" ? (
+            <Button variant="outline" size="sm" onClick={() => settleDeduction(row)} disabled={mutations.settleDeduction.isPending}>
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Settle
+            </Button>
+          ) : null}
+        </div>
+      ),
+    },
     {
       id: "actions",
       header: "Actions",

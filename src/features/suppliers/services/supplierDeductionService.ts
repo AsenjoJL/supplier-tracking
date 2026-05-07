@@ -13,5 +13,6 @@ export const supplierDeductionService = {
   ): (() => void) => subscribeDocs<SupplierDeduction>(collectionName, [orderBy("date", "desc")], onNext, onError),
   create: (payload: SupplierDeductionFormValues): Promise<string> => addDocument<SupplierDeduction>(collectionName, payload),
   update: (id: string, payload: SupplierDeductionFormValues): Promise<void> => updateDocument<SupplierDeduction>(collectionName, id, payload),
+  settle: (id: string): Promise<void> => updateDocument<SupplierDeduction>(collectionName, id, { status: "settled" }),
   remove: (id: string): Promise<void> => deleteDocument(collectionName, id),
 };
