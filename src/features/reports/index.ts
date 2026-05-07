@@ -1,4 +1,5 @@
 export * from "./components/ReportsView";
+export * from "./components/ReportAnalytics";
 export * from "./components/ReportSummaryCards";
 export * from "./components/ReportDateRangeFilter";
 export * from "./components/tabs/InventoryReportTab";
