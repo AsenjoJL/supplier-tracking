@@ -1,4 +1,4 @@
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/features/products/types/product.types";
@@ -13,9 +13,10 @@ type StockInSummaryRowProps = {
   supplierName?: string;
   showEmptyTarhaLabel?: boolean;
   onEdit?: (stockIn: FirestoreDoc<StockIn>) => void;
+  onDelete?: (stockIn: FirestoreDoc<StockIn>) => void;
 };
 
-export function StockInSummaryRow({ stockIn, product, supplierName, showEmptyTarhaLabel = true, onEdit }: StockInSummaryRowProps) {
+export function StockInSummaryRow({ stockIn, product, supplierName, showEmptyTarhaLabel = true, onEdit, onDelete }: StockInSummaryRowProps) {
   const tarhaPercent = stockIn.tarhaPercent ?? (stockIn.qty > 0 && stockIn.tarhaQty > 0 ? Number(((stockIn.tarhaQty / stockIn.qty) * 100).toFixed(2)) : 0);
   const tarhaPercentLabel = Number.isInteger(tarhaPercent) ? `${tarhaPercent}%` : `${tarhaPercent.toFixed(2)}%`;
   const netQty = computeNetStockInQty(stockIn.qty, stockIn.tarhaQty);
@@ -39,11 +40,21 @@ export function StockInSummaryRow({ stockIn, product, supplierName, showEmptyTar
         ) : null}
       </div>
       <p className="font-medium">{formatCurrency(stockIn.finalPrice)}</p>
-      {onEdit ? (
-        <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => onEdit(stockIn)}>
-          <Pencil className="h-3.5 w-3.5" />
-          Edit
-        </Button>
+      {onEdit || onDelete ? (
+        <div className="flex flex-wrap gap-2">
+          {onEdit ? (
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => onEdit(stockIn)}>
+              <Pencil className="h-3.5 w-3.5" />
+              Edit
+            </Button>
+          ) : null}
+          {onDelete ? (
+            <Button variant="destructive" size="sm" className="w-full sm:w-auto" onClick={() => onDelete(stockIn)}>
+              <Trash2 className="h-3.5 w-3.5" />
+              Del
+            </Button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

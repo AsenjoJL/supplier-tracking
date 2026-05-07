@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { SectionCard } from "@/components/common/SectionCard";
@@ -27,6 +28,7 @@ type StockInTableProps = {
   productsById: Map<string, FirestoreDoc<Product>>;
   suppliersById: Map<string, FirestoreDoc<Supplier>>;
   onEdit: (stockIn: FirestoreDoc<StockIn>) => void;
+  onDelete: (stockIn: FirestoreDoc<StockIn>) => void;
 };
 
 const toStockInFormValues = (stockIn: FirestoreDoc<StockIn>): StockInFormValues => ({
@@ -44,7 +46,7 @@ const toStockInFormValues = (stockIn: FirestoreDoc<StockIn>): StockInFormValues 
   remarks: stockIn.remarks,
 });
 
-function StockInTable({ title, description, emptyTitle, showEmptyTarhaLabel = true, stockIns, productsById, suppliersById, onEdit }: StockInTableProps) {
+function StockInTable({ title, description, emptyTitle, showEmptyTarhaLabel = true, stockIns, productsById, suppliersById, onEdit, onDelete }: StockInTableProps) {
   return (
     <SectionCard title={title} description={description}>
       {stockIns.length > 0 ? (
@@ -60,6 +62,7 @@ function StockInTable({ title, description, emptyTitle, showEmptyTarhaLabel = tr
                 supplierName={supplier?.name ?? "Unassigned"}
                 showEmptyTarhaLabel={showEmptyTarhaLabel}
                 onEdit={onEdit}
+                onDelete={onDelete}
               />
             );
           })}
@@ -78,6 +81,7 @@ export function StockInList() {
   const mutations = useStockInMutations();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<FirestoreDoc<StockIn> | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const productsById = useMemo(() => new Map((products.data ?? []).map((product) => [product.id, product])), [products.data]);
   const suppliersById = useMemo(() => new Map((suppliers.data ?? []).map((supplier) => [supplier.id, supplier])), [suppliers.data]);
@@ -129,6 +133,7 @@ export function StockInList() {
         productsById={productsById}
         suppliersById={suppliersById}
         onEdit={(stockIn) => { setEditing(stockIn); setFormOpen(true); }}
+        onDelete={(stockIn) => setDeleteId(stockIn.id)}
       />
       <StockInTable
         title="Vegetable Supplier Stock-In"
@@ -138,6 +143,7 @@ export function StockInList() {
         productsById={productsById}
         suppliersById={suppliersById}
         onEdit={(stockIn) => { setEditing(stockIn); setFormOpen(true); }}
+        onDelete={(stockIn) => setDeleteId(stockIn.id)}
       />
       <StockInForm
         open={formOpen}
@@ -148,6 +154,14 @@ export function StockInList() {
         }}
         onSubmit={submit}
         pending={mutations.createStockIn.isPending || mutations.updateStockIn.isPending}
+      />
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete stock-in record?"
+        description="This removes the incoming stock record and updates computed product balances."
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        onConfirm={() => deleteId && mutations.deleteStockIn.mutate(deleteId, { onSuccess: () => setDeleteId(null) })}
+        pending={mutations.deleteStockIn.isPending}
       />
     </PageWrapper>
   );

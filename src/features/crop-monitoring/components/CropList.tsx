@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Eye, Pencil, Plus, Wheat } from "lucide-react";
+import { Eye, Pencil, Plus, Trash2, Wheat } from "lucide-react";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -31,6 +32,7 @@ export function CropList() {
   const [editing, setEditing] = useState<FirestoreDoc<Crop> | null>(null);
   const [detail, setDetail] = useState<FirestoreDoc<Crop> | null>(null);
   const [allocating, setAllocating] = useState<FirestoreDoc<Crop> | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const rows = useMemo<CropRow[]>(() => (crops.data ?? []).map((crop) => ({
     ...crop,
@@ -53,6 +55,7 @@ export function CropList() {
           <Button variant="outline" size="sm" onClick={() => setDetail(row)}><Eye className="h-3.5 w-3.5" />Details</Button>
           <Button variant="outline" size="sm" onClick={() => setAllocating(row)}><Wheat className="h-3.5 w-3.5" />Input</Button>
           <Button variant="outline" size="sm" onClick={() => { setEditing(row); setFormOpen(true); }}><Pencil className="h-3.5 w-3.5" />Edit</Button>
+          <Button variant="destructive" size="sm" onClick={() => setDeleteId(row.id)}><Trash2 className="h-3.5 w-3.5" />Del</Button>
         </div>
       ),
     },
@@ -75,6 +78,14 @@ export function CropList() {
       <CropForm open={formOpen} crop={editing} onOpenChange={setFormOpen} onSubmit={submit} pending={mutations.createCrop.isPending || mutations.updateCrop.isPending} />
       <CropDetailView crop={detail} open={detail !== null} onOpenChange={(open) => { if (!open) setDetail(null); }} />
       <AllocateInputsModal crop={allocating} open={allocating !== null} onOpenChange={(open) => { if (!open) setAllocating(null); }} />
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete crop record?"
+        description="This removes the crop record. Existing stock-out and allocation history remains in Firestore for audit."
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        onConfirm={() => deleteId && mutations.deleteCrop.mutate(deleteId, { onSuccess: () => setDeleteId(null) })}
+        pending={mutations.deleteCrop.isPending}
+      />
     </PageWrapper>
   );
 }
