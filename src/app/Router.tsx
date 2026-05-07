@@ -11,6 +11,7 @@ const OpenListingPage = lazy(() => import("@/pages/OpenListingPage"));
 const StockInPage = lazy(() => import("@/pages/StockInPage"));
 const StockOutPage = lazy(() => import("@/pages/StockOutPage"));
 const FarmInputsPage = lazy(() => import("@/pages/FarmInputsPage"));
+const DeductionsPage = lazy(() => import("@/pages/DeductionsPage"));
 const CropMonitoringPage = lazy(() => import("@/pages/CropMonitoringPage"));
 const HarvestCalendarPage = lazy(() => import("@/pages/HarvestCalendarPage"));
 const TarhaPage = lazy(() => import("@/pages/TarhaPage"));
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
       { path: "stock-in", element: withSuspense(<StockInPage />) },
       { path: "stock-out", element: withSuspense(<StockOutPage />) },
       { path: "farm-inputs", element: withSuspense(<FarmInputsPage />) },
+      { path: "deductions", element: withSuspense(<DeductionsPage />) },
       { path: "crop-monitoring", element: withSuspense(<CropMonitoringPage />) },
       { path: "harvest-calendar", element: withSuspense(<HarvestCalendarPage />) },
       { path: "tarha", element: withSuspense(<TarhaPage />) },

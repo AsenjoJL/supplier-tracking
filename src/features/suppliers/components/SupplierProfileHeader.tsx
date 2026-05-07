@@ -1,7 +1,6 @@
-import { CircleUserRound, Mail, MapPin, Package, Phone, Sprout, UserRound, Warehouse } from "lucide-react";
+import { CircleUserRound, HandCoins, Mail, MapPin, Package, Phone, Sprout, UserRound, Warehouse } from "lucide-react";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import type { Supplier } from "@/features/suppliers/types/supplier.types";
-import { SUPPLIER_KIND_LABELS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
 
@@ -11,6 +10,7 @@ type SupplierProfileHeaderProps = {
   activeCropCount: number;
   totalStock: number;
   totalInventoryValue: number;
+  openDeductionsTotal: number;
   showCropMetrics?: boolean;
 };
 
@@ -32,6 +32,7 @@ export function SupplierProfileHeader({
   activeCropCount,
   totalStock,
   totalInventoryValue,
+  openDeductionsTotal,
   showCropMetrics = true,
 }: SupplierProfileHeaderProps) {
   return (
@@ -48,14 +49,15 @@ export function SupplierProfileHeader({
                 <h2 className="break-words font-serif text-2xl leading-none sm:text-3xl">{supplier.name}</h2>
                 <StatusBadge status={supplier.status} />
               </div>
-              <p className="text-sm text-muted-foreground">{SUPPLIER_KIND_LABELS[supplier.supplierKind ?? "vegetable"]}</p>
+              <p className="text-sm text-muted-foreground">Vegetable Supplier</p>
             </div>
           </div>
-          <div className={showCropMetrics ? "grid w-full grid-cols-2 gap-2 text-sm md:w-auto md:grid-cols-4" : "grid w-full grid-cols-2 gap-2 text-sm md:w-auto md:grid-cols-3"}>
+          <div className={showCropMetrics ? "grid w-full grid-cols-2 gap-2 text-sm md:w-auto md:grid-cols-5" : "grid w-full grid-cols-2 gap-2 text-sm md:w-auto md:grid-cols-4"}>
             <ProfileStat icon={Package} label="Products" value={String(productCount)} />
             {showCropMetrics ? <ProfileStat icon={Sprout} label="Active crops" value={String(activeCropCount)} /> : null}
             <ProfileStat icon={Warehouse} label="Stock" value={String(totalStock)} />
             <ProfileStat icon={Package} label="Value" value={formatCurrency(totalInventoryValue)} />
+            <ProfileStat icon={HandCoins} label="Deductions" value={formatCurrency(openDeductionsTotal)} />
           </div>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2">

@@ -89,10 +89,8 @@ export function StockInList() {
     (stockIns.data ?? []).forEach((stockIn) => {
       const product = productsById.get(stockIn.productId);
       const supplier = suppliersById.get(stockIn.supplierId);
-      const hasAssignedSupplier = stockIn.supplierId.trim().length > 0 && supplier !== undefined;
-      const supplierKind = supplier?.supplierKind ?? "vegetable";
       const productIsFarmInput = product ? FARM_INPUT_TYPES.some((type) => type === product.type) : false;
-      const usesFarmInputFormat = supplierKind === "farmInput" || (productIsFarmInput && (!hasAssignedSupplier || supplierKind === "both"));
+      const usesFarmInputFormat = productIsFarmInput;
 
       if (usesFarmInputFormat) {
         farmInput.push(stockIn);
@@ -123,7 +121,7 @@ export function StockInList() {
       action={<Button onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="h-4 w-4" />Record Stock-In</Button>}
     >
       <StockInTable
-        title="Farm Input Supplier Stock-In"
+        title="Farm Input Stock-In"
         description="Incoming abuno, fertilizer, medicine, green solution, and seed supplies."
         emptyTitle="No farm input stock-in yet"
         showEmptyTarhaLabel={false}

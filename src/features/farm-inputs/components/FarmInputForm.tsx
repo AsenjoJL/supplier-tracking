@@ -22,7 +22,6 @@ export function FarmInputForm(props: FarmInputFormProps) {
       {...props}
       title={props.product ? "Edit Farm Input" : "Add Farm Input"}
       allowedTypes={FARM_INPUT_TYPES}
-      allowedSupplierKinds={["farmInput", "both"]}
       defaultValuesOverride={farmInputDefaults}
     />
   );

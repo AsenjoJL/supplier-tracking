@@ -6,6 +6,7 @@ import { useCropMutations } from "@/features/crop-monitoring/hooks/useCropMutati
 import type { Crop, CropFormValues } from "@/features/crop-monitoring/types/crop.types";
 import { SupplierProfileActivity } from "@/features/suppliers/components/SupplierProfileActivity";
 import { SupplierProfileCrops } from "@/features/suppliers/components/SupplierProfileCrops";
+import { SupplierProfileDeductions } from "@/features/suppliers/components/SupplierProfileDeductions";
 import { SupplierProfileHeader } from "@/features/suppliers/components/SupplierProfileHeader";
 import { SupplierProfileProducts } from "@/features/suppliers/components/SupplierProfileProducts";
 import { useSupplierDetail } from "@/features/suppliers/hooks/useSupplierDetail";
@@ -21,7 +22,6 @@ export function SupplierDetailDrawer({ supplierId, open, onOpenChange }: Supplie
   const detail = useSupplierDetail(supplierId);
   const cropMutations = useCropMutations();
   const [editingCrop, setEditingCrop] = useState<FirestoreDoc<Crop> | null>(null);
-  const showCropMonitoring = (detail.supplier?.supplierKind ?? "vegetable") === "vegetable";
   const submitCropEdit = (values: CropFormValues) => {
     if (!editingCrop) return;
     cropMutations.updateCrop.mutate(
@@ -37,9 +37,7 @@ export function SupplierDetailDrawer({ supplierId, open, onOpenChange }: Supplie
           <DialogHeader>
             <DialogTitle>Supplier Profile</DialogTitle>
             <DialogDescription>
-              {showCropMonitoring
-                ? "Products, crop monitoring, and inventory movements connected to this supplier."
-                : "Products and inventory movements connected to this supplier."}
+              Products, crop monitoring, and inventory movements connected to this supplier.
             </DialogDescription>
           </DialogHeader>
           {detail.isLoading ? <LoadingSpinner label="Loading supplier details" /> : null}
@@ -51,16 +49,20 @@ export function SupplierDetailDrawer({ supplierId, open, onOpenChange }: Supplie
                 activeCropCount={detail.ongoingCrops.length}
                 totalStock={detail.totalStock}
                 totalInventoryValue={detail.totalInventoryValue}
-                showCropMetrics={showCropMonitoring}
+                openDeductionsTotal={detail.openDeductionsTotal}
+              />
+              <SupplierProfileDeductions
+                supplierId={supplierId ?? ""}
+                deductions={detail.deductionRecords}
+                openTotal={detail.openDeductionsTotal}
+                settledTotal={detail.settledDeductionsTotal}
               />
               <SupplierProfileProducts
                 productStock={detail.productStock}
-                title={showCropMonitoring ? "Owned Vegetables / Products" : "Owned Products"}
-                description={showCropMonitoring
-                  ? "Vegetables and products linked to this supplier, with current balances."
-                  : "Farm input products linked to this supplier, with current balances."}
+                title="Owned Vegetables / Products"
+                description="Vegetables and products linked to this supplier, with current balances."
               />
-              {showCropMonitoring ? <SupplierProfileCrops crops={detail.cropRecords} onEdit={setEditingCrop} /> : null}
+              <SupplierProfileCrops crops={detail.cropRecords} onEdit={setEditingCrop} />
               <SupplierProfileActivity stockInRecords={detail.stockInRecords} stockOutRecords={detail.stockOutRecords} />
             </div>
           ) : null}

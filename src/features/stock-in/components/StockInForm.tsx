@@ -10,7 +10,7 @@ import { useProducts } from "@/features/products/hooks/useProducts";
 import { stockInSchema } from "@/features/stock-in/schemas/stock-in.schema";
 import type { StockInFormValues } from "@/features/stock-in/types/stock-in.types";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
-import { FARM_INPUT_TYPES, PRODUCT_TYPE_LABELS, PRODUCT_TYPES, STOCK_IN_PRICE_OPTIONS, SUPPLIER_KIND_LABELS, UNIT_OPTIONS } from "@/lib/constants";
+import { FARM_INPUT_TYPES, PRODUCT_TYPE_LABELS, PRODUCT_TYPES, STOCK_IN_PRICE_OPTIONS, UNIT_OPTIONS } from "@/lib/constants";
 import { formatCurrency, todayISO } from "@/lib/utils";
 import { TarhaDeductionField } from "./TarhaDeductionField";
 
@@ -50,16 +50,14 @@ export function StockInForm({ open, initialValues = null, pending = false, onOpe
   const unitPrice = Number(form.watch("originalPrice") || 0);
   const selectedUnit = form.watch("unit");
   const selectedSupplier = suppliers.data?.find((supplier) => supplier.id === supplierId) ?? null;
-  const selectedSupplierKind = selectedSupplier?.supplierKind ?? "vegetable";
   const selectedProduct = products.data?.find((item) => item.id === productId) ?? null;
   const selectedProductIsFarmInput = selectedProduct ? (FARM_INPUT_TYPES as readonly string[]).includes(selectedProduct.type) : false;
-  const isFarmInputStockIn = selectedSupplierKind === "farmInput" || selectedProductIsFarmInput;
+  const isFarmInputStockIn = selectedProductIsFarmInput;
+  const selectableSuppliers = suppliers.data ?? [];
   const productsForSupplier = supplierId
     ? (products.data ?? []).filter((product) => {
         if (product.supplierId !== supplierId) return false;
-        if (selectedSupplierKind === "farmInput") return (FARM_INPUT_TYPES as readonly string[]).includes(product.type);
-        if (selectedSupplierKind === "vegetable") return product.type === "vegetable";
-        return true;
+        return product.type === "vegetable";
       })
     : products.data ?? [];
   const productGroups = PRODUCT_TYPES.map((type) => ({
@@ -116,13 +114,13 @@ export function StockInForm({ open, initialValues = null, pending = false, onOpe
                 }}
               >
                 <option value="">Unassigned</option>
-                {(suppliers.data ?? []).map((supplier) => (
+                {selectableSuppliers.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>
-                    {supplier.name} · {SUPPLIER_KIND_LABELS[supplier.supplierKind ?? "vegetable"]}
+                    {supplier.name}
                   </option>
                 ))}
               </select>
-              {selectedSupplier ? <p className="text-xs text-muted-foreground">{SUPPLIER_KIND_LABELS[selectedSupplierKind]} format</p> : null}
+              {selectedSupplier ? <p className="text-xs text-muted-foreground">Vegetable supplier</p> : null}
             </div>
             <div className="space-y-2">
               <Label>Product</Label>

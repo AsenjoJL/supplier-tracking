@@ -34,19 +34,21 @@ export function ListingTable() {
     }))
     .filter((section) => type === "all" ? section.rows.length > 0 : section.type === type), [rows, type]);
 
-  const baseColumns: DataTableColumn<ListingRow>[] = [
+  const productColumns: DataTableColumn<ListingRow>[] = [
     { id: "product", header: "Product", sortable: true, sortValue: (row) => row.product.name, cell: (row) => <div><p className="font-medium">{row.product.name}</p><p className="text-xs text-muted-foreground">{row.product.id}</p></div> },
-    { id: "supplier", header: "Supplier", cell: (row) => row.supplier?.name ?? "—" },
     { id: "price", header: "Latest Price", cell: (row) => formatCurrency(row.latestStockIn?.finalPrice ?? row.product.price) },
     { id: "stock", header: "Stock", sortable: true, sortValue: (row) => row.currentStock, cell: (row) => <StatusBadge status={row.currentStock <= 0 ? "out" : row.currentStock <= 5 ? "low" : "ok"} label={`${row.currentStock} ${row.product.unit}`} /> },
     { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.product.status} /> },
   ];
+  const supplierColumn: DataTableColumn<ListingRow> = { id: "supplier", header: "Supplier", cell: (row) => row.supplier?.name ?? "—" };
   const vegetableColumns: DataTableColumn<ListingRow>[] = [
-    ...baseColumns,
+    productColumns[0],
+    supplierColumn,
+    ...productColumns.slice(1),
     { id: "tarha", header: "Quick Tarha", cell: (row) => <TarhaQuickButton stockIn={row.latestStockIn} /> },
   ];
   const farmInputColumns: DataTableColumn<ListingRow>[] = [
-    ...baseColumns,
+    ...productColumns,
   ];
 
   if (listing.isLoading) return <LoadingSpinner />;

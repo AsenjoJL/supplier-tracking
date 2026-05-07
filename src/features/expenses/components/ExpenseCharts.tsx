@@ -13,6 +13,7 @@ const chartColors = ["#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#2f6f40", "#94
 const sourceColors = {
   stockIn: "#3b82f6",
   cropInput: "#8b5cf6",
+  supplierDeduction: "#10b981",
   manual: "#f59e0b",
   tarha: "#ef4444",
 };
@@ -86,11 +87,11 @@ function ExpenseBreakdown({ rows, total }: { rows: BreakdownRow[]; total: number
 }
 
 function ExpensesOverTime({ rows }: { rows: OverTimeRow[] }) {
-  const maxValue = Math.max(...rows.flatMap((row) => [row.stockIn, row.cropInput, row.manual, row.tarha]), 1);
+  const maxValue = Math.max(...rows.flatMap((row) => [row.stockIn, row.cropInput, row.supplierDeduction, row.manual, row.tarha]), 1);
   const xForIndex = (index: number) => margins.left + (rows.length <= 1 ? 0 : (index / (rows.length - 1)) * plotWidth);
   const yForValue = (value: number) => margins.top + plotHeight - (value / maxValue) * plotHeight;
   const labelEvery = Math.max(1, Math.ceil(rows.length / 5));
-  const linePath = (key: keyof Pick<OverTimeRow, "stockIn" | "cropInput" | "manual" | "tarha">) =>
+  const linePath = (key: keyof Pick<OverTimeRow, "stockIn" | "cropInput" | "supplierDeduction" | "manual" | "tarha">) =>
     rows.map((row, index) => `${index === 0 ? "M" : "L"} ${xForIndex(index)} ${yForValue(row[key])}`).join(" ");
 
   return (
@@ -111,7 +112,7 @@ function ExpensesOverTime({ rows }: { rows: OverTimeRow[] }) {
               </g>
             );
           })}
-          {(["stockIn", "cropInput", "manual", "tarha"] as const).map((key) => (
+          {(["stockIn", "cropInput", "supplierDeduction", "manual", "tarha"] as const).map((key) => (
             <path key={key} d={linePath(key)} fill="none" stroke={sourceColors[key]} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           ))}
           {rows.map((row, index) => index % labelEvery === 0 ? (
@@ -189,6 +190,7 @@ function ExpenseGuide() {
       <div className="grid gap-3 text-sm md:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
         <GuideItem title="From Stock In" text="Purchases are recorded from stock-in transaction final prices." />
         <GuideItem title="From Vegetables" text="Allocated crop inputs are valued from the linked product unit price." />
+        <GuideItem title="Supplier Deductions" text="Cash advances, loans, and supplier deductions are pulled from supplier profiles." />
         <GuideItem title="Manual Expenses" text="Labor, transportation, utilities, and other non-inventory costs are added manually." />
       </div>
     </SectionCard>
@@ -230,6 +232,7 @@ function ExpenseLegend() {
     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
       <LegendDot color={sourceColors.stockIn} label="From Stock In" />
       <LegendDot color={sourceColors.cropInput} label="From Vegetables" />
+      <LegendDot color={sourceColors.supplierDeduction} label="Supplier Deductions" />
       <LegendDot color={sourceColors.manual} label="Manual" />
       <LegendDot color={sourceColors.tarha} label="Tarha" />
     </div>

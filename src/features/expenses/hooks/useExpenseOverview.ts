@@ -7,9 +7,11 @@ import { useProducts } from "@/features/products/hooks/useProducts";
 import type { ProductType } from "@/features/products/types/product.types";
 import { useStockIn } from "@/features/stock-in/hooks/useStockIn";
 import { useStockOut } from "@/features/stock-out/hooks/useStockOut";
+import { useSupplierDeductions } from "@/features/suppliers/hooks/useSupplierDeductions";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
-import { EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORIES, EXPENSE_SOURCE_LABELS, EXPENSE_SOURCES } from "@/lib/constants";
+import { EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORIES, EXPENSE_SOURCE_LABELS, EXPENSE_SOURCES, SUPPLIER_DEDUCTION_TYPE_LABELS } from "@/lib/constants";
 import { computeStockInPricing } from "@/lib/utils";
+import type { SupplierDeductionType } from "@/features/suppliers/types/supplier-deduction.types";
 
 export type ExpenseDateRange = {
   from: string;
@@ -56,10 +58,17 @@ const productTypeToExpenseCategory = (type: ProductType): ExpenseCategory => {
   return "others";
 };
 
+const supplierDeductionTypeToExpenseCategory = (type: SupplierDeductionType): ExpenseCategory => {
+  if (type === "cashAdvance" || type === "loan" || type === "packaging" || type === "others") return type;
+  if (type === "transport") return "transportation";
+  return "others";
+};
+
 export function useExpenseOverview(range: ExpenseDateRange) {
   const manualExpenses = useManualExpenses();
   const products = useProducts();
   const suppliers = useSuppliers();
+  const supplierDeductions = useSupplierDeductions();
   const crops = useCrops();
   const stockIns = useStockIn();
   const stockOuts = useStockOut();
@@ -125,6 +134,22 @@ export function useExpenseOverview(range: ExpenseDateRange) {
         supplierOrRemarks: expense.remarks || "Manual expense",
         manualExpenseId: expense.id,
       })),
+      ...(supplierDeductions.data ?? []).map((deduction): ExpenseRow => {
+        const supplier = supplierMap.get(deduction.supplierId);
+        return {
+          id: `supplierDeduction-${deduction.id}`,
+          date: deduction.date,
+          source: "supplierDeduction",
+          category: supplierDeductionTypeToExpenseCategory(deduction.type),
+          itemName: SUPPLIER_DEDUCTION_TYPE_LABELS[deduction.type],
+          cropId: "",
+          cropName: "—",
+          qtyLabel: "—",
+          unitPrice: deduction.amount,
+          amount: deduction.amount,
+          supplierOrRemarks: [supplier?.name ?? "Unknown supplier", deduction.remarks].filter(Boolean).join(" - "),
+        };
+      }),
       ...(stockIns.data ?? [])
         .filter((stockIn) => stockIn.tarhaQty > 0)
         .map((stockIn): ExpenseRow => {
@@ -179,6 +204,7 @@ export function useExpenseOverview(range: ExpenseDateRange) {
       label: day.label,
       stockIn: rows.filter((row) => row.source === "stockIn" && row.date === day.iso).reduce((sum, row) => sum + row.amount, 0),
       cropInput: rows.filter((row) => row.source === "cropInput" && row.date === day.iso).reduce((sum, row) => sum + row.amount, 0),
+      supplierDeduction: rows.filter((row) => row.source === "supplierDeduction" && row.date === day.iso).reduce((sum, row) => sum + row.amount, 0),
       manual: rows.filter((row) => row.source === "manual" && row.date === day.iso).reduce((sum, row) => sum + row.amount, 0),
       tarha: rows.filter((row) => row.source === "tarha" && row.date === day.iso).reduce((sum, row) => sum + row.amount, 0),
     }));
@@ -192,12 +218,14 @@ export function useExpenseOverview(range: ExpenseDateRange) {
         totalExpenses,
         stockInPurchases: totalForSource("stockIn"),
         cropInputExpenses: totalForSource("cropInput"),
+        supplierDeductions: totalForSource("supplierDeduction"),
         manualExpenses: totalForSource("manual"),
         tarhaLosses: totalForSource("tarha"),
         trends: {
           total: trendPercent(totalExpenses, previousTotalExpenses),
           stockIn: trendPercent(totalForSource("stockIn"), totalForSource("stockIn", previousRows)),
           cropInput: trendPercent(totalForSource("cropInput"), totalForSource("cropInput", previousRows)),
+          supplierDeduction: trendPercent(totalForSource("supplierDeduction"), totalForSource("supplierDeduction", previousRows)),
           manual: trendPercent(totalForSource("manual"), totalForSource("manual", previousRows)),
           tarha: trendPercent(totalForSource("tarha"), totalForSource("tarha", previousRows)),
         },
@@ -209,10 +237,10 @@ export function useExpenseOverview(range: ExpenseDateRange) {
         byCrop,
       },
     };
-  }, [crops.data, manualExpenses.data, products.data, range.from, range.to, stockIns.data, stockOuts.data, suppliers.data]);
+  }, [crops.data, manualExpenses.data, products.data, range.from, range.to, stockIns.data, stockOuts.data, supplierDeductions.data, suppliers.data]);
 
   return {
     ...data,
-    isLoading: manualExpenses.isLoading || products.isLoading || suppliers.isLoading || crops.isLoading || stockIns.isLoading || stockOuts.isLoading,
+    isLoading: manualExpenses.isLoading || products.isLoading || suppliers.isLoading || supplierDeductions.isLoading || crops.isLoading || stockIns.isLoading || stockOuts.isLoading,
   };
 }

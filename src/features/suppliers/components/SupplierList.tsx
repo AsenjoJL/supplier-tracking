@@ -12,7 +12,6 @@ import { SupplierProfileList } from "@/features/suppliers/components/SupplierPro
 import { useSupplierMutations } from "@/features/suppliers/hooks/useSupplierMutations";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import type { Supplier, SupplierFormValues } from "@/features/suppliers/types/supplier.types";
-import { SUPPLIER_KIND_LABELS } from "@/lib/constants";
 import { normalizeSearch } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
 
@@ -28,18 +27,9 @@ export function SupplierList() {
   const rows = useMemo(() => {
     const term = normalizeSearch(search);
     return (suppliers.data ?? []).filter((supplier) => {
-      const kindLabel = SUPPLIER_KIND_LABELS[supplier.supplierKind ?? "vegetable"];
-      return normalizeSearch(`${supplier.name} ${supplier.contactPerson} ${supplier.address} ${kindLabel}`).includes(term);
+      return normalizeSearch(`${supplier.name} ${supplier.contactPerson} ${supplier.address}`).includes(term);
     });
   }, [search, suppliers.data]);
-  const vegetableSuppliers = useMemo(
-    () => rows.filter((supplier) => (supplier.supplierKind ?? "vegetable") === "vegetable"),
-    [rows],
-  );
-  const farmInputSuppliers = useMemo(
-    () => rows.filter((supplier) => (supplier.supplierKind ?? "vegetable") !== "vegetable"),
-    [rows],
-  );
 
   const submit = (values: SupplierFormValues) => {
     if (editing) mutations.updateSupplier.mutate({ id: editing.id, payload: values }, { onSuccess: () => setFormOpen(false) });
@@ -51,30 +41,18 @@ export function SupplierList() {
   return (
     <PageWrapper
       title="Suppliers"
-      description="Manage grower partners, agri suppliers, and their linked inventory."
+      description="Manage vegetable supplier profiles, deductions, and linked inventory."
       action={<Button onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="h-4 w-4" />Add Supplier</Button>}
     >
       <Input placeholder="Search suppliers..." value={search} onChange={(event) => setSearch(event.target.value)} className="w-full max-w-md" />
-      <div className="grid gap-6 2xl:grid-cols-2">
+      <div className="grid gap-6">
         <SectionCard
           title="Vegetable Suppliers"
-          description={`${vegetableSuppliers.length} ${vegetableSuppliers.length === 1 ? "supplier" : "suppliers"}`}
+          description={`${rows.length} ${rows.length === 1 ? "supplier" : "suppliers"}`}
         >
           <SupplierProfileList
-            suppliers={vegetableSuppliers}
+            suppliers={rows}
             emptyMessage="No vegetable suppliers found."
-            onView={setDetailId}
-            onEdit={(supplier) => { setEditing(supplier); setFormOpen(true); }}
-            onDelete={setDeleteId}
-          />
-        </SectionCard>
-        <SectionCard
-          title="Farm Input & Other Suppliers"
-          description={`${farmInputSuppliers.length} ${farmInputSuppliers.length === 1 ? "supplier" : "suppliers"} for abuno, fertilizer, medicine, green solution, seeds, and mixed supply.`}
-        >
-          <SupplierProfileList
-            suppliers={farmInputSuppliers}
-            emptyMessage="No farm input or other suppliers found."
             onView={setDetailId}
             onEdit={(supplier) => { setEditing(supplier); setFormOpen(true); }}
             onDelete={setDeleteId}

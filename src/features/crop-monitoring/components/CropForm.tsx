@@ -45,13 +45,7 @@ export function CropForm({ open, crop, pending = false, onOpenChange, onSubmit }
   const plantingDate = form.watch("plantingDate");
   const daysToHarvest = Number(form.watch("daysToHarvest") || 0);
   const forecast = plantingDate && daysToHarvest ? addDaysToISODate(plantingDate, daysToHarvest) : "";
-  const vegetableSuppliers = useMemo(
-    () => (suppliers.data ?? []).filter((supplier) => {
-      const supplierKind = supplier.supplierKind ?? "vegetable";
-      return supplierKind === "vegetable" || supplierKind === "both";
-    }),
-    [suppliers.data],
-  );
+  const vegetableSuppliers = useMemo(() => suppliers.data ?? [], [suppliers.data]);
   const vegetableProducts = useMemo(
     () => (products.data ?? []).filter((product) => product.type === "vegetable" && product.status === "active"),
     [products.data],

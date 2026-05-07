@@ -11,6 +11,7 @@ import { ReportSummaryCards } from "./ReportSummaryCards";
 import { HarvestReportTab } from "./tabs/HarvestReportTab";
 import { InventoryReportTab } from "./tabs/InventoryReportTab";
 import { RestockReportTab } from "./tabs/RestockReportTab";
+import { SupplierDeductionsReportTab } from "./tabs/SupplierDeductionsReportTab";
 import { TarhaReportTab } from "./tabs/TarhaReportTab";
 
 export function ReportsView() {
@@ -38,13 +39,15 @@ export function ReportsView() {
       <ReportSummaryCards {...reports.summary} />
       <ReportAnalytics analytics={reports.analytics} />
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-5">
           <TabsTrigger value="inventory">Inventory</TabsTrigger>
+          <TabsTrigger value="deductions">Deductions</TabsTrigger>
           <TabsTrigger value="tarha">Tarha</TabsTrigger>
           <TabsTrigger value="harvest">Harvest</TabsTrigger>
           <TabsTrigger value="restock">Restock</TabsTrigger>
         </TabsList>
         <TabsContent value="inventory"><InventoryReportTab rows={reports.stockRows} /></TabsContent>
+        <TabsContent value="deductions"><SupplierDeductionsReportTab rows={reports.supplierDeductionRows} /></TabsContent>
         <TabsContent value="tarha"><TarhaReportTab rows={reports.tarhaRows} /></TabsContent>
         <TabsContent value="harvest"><HarvestReportTab rows={reports.harvestRows} /></TabsContent>
         <TabsContent value="restock"><RestockReportTab rows={reports.lowItems} /></TabsContent>

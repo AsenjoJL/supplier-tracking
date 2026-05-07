@@ -10,31 +10,24 @@ import { RestockStatusBadge } from "@/features/farm-inputs/components/RestockSta
 import { useFarmInputs } from "@/features/farm-inputs/hooks/useFarmInputs";
 import { useProductMutations } from "@/features/products/hooks/useProductMutations";
 import type { Product, ProductFormValues } from "@/features/products/types/product.types";
-import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import { formatCurrency } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
 
 type FarmInputRow = {
   product: FirestoreDoc<Product>;
   currentStock: number;
-  supplierName: string;
 };
 
 export function FarmInputList() {
   const farmInputs = useFarmInputs();
-  const suppliers = useSuppliers();
   const mutations = useProductMutations();
   const [formOpen, setFormOpen] = useState(false);
 
-  const rows: FarmInputRow[] = farmInputs.rows.map((row) => ({
-    ...row,
-    supplierName: suppliers.data?.find((supplier) => supplier.id === row.product.supplierId)?.name ?? "Unassigned",
-  }));
+  const rows: FarmInputRow[] = farmInputs.rows;
 
   const columns: DataTableColumn<FarmInputRow>[] = [
     { id: "name", header: "Input", sortable: true, sortValue: (row) => row.product.name, cell: (row) => <p className="font-medium">{row.product.name}</p> },
     { id: "category", header: "Category", cell: (row) => <StatusBadge status={row.product.type} /> },
-    { id: "supplier", header: "Supplier", cell: (row) => row.supplierName },
     { id: "price", header: "Price", cell: (row) => formatCurrency(row.product.price) },
     { id: "stock", header: "Current Stock", cell: (row) => <StatusBadge status={row.currentStock <= 0 ? "out" : row.currentStock <= 5 ? "low" : "ok"} label={`${row.currentStock} ${row.product.unit}`} /> },
     { id: "restock", header: "Restock", cell: (row) => <RestockStatusBadge currentStock={row.currentStock} /> },
@@ -44,7 +37,7 @@ export function FarmInputList() {
     mutations.createProduct.mutate(values, { onSuccess: () => setFormOpen(false) });
   };
 
-  if (farmInputs.isLoading || suppliers.isLoading) return <LoadingSpinner />;
+  if (farmInputs.isLoading) return <LoadingSpinner />;
 
   return (
     <PageWrapper

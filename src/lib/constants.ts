@@ -16,9 +16,11 @@ export const UNIT_OPTIONS = ["Kilo", "Gram", "Piece", "Bundle", "Pack", "Sack", 
 
 export const CROP_QUANTITY_UNITS = ["pcs", "seedlings", "sachet", "tray", "pack", "kilo", "grams", "bundle", "hectare", "sqm"] as const;
 
-export const SUPPLIER_KINDS = ["vegetable", "farmInput", "both"] as const;
+export const SUPPLIER_KINDS = ["vegetable"] as const;
 
 export const EXPENSE_CATEGORIES = [
+  "cashAdvance",
+  "loan",
   "fertilizer",
   "medicine",
   "greenSolution",
@@ -31,7 +33,7 @@ export const EXPENSE_CATEGORIES = [
   "others",
 ] as const;
 
-export const EXPENSE_SOURCES = ["stockIn", "cropInput", "manual", "tarha"] as const;
+export const EXPENSE_SOURCES = ["stockIn", "cropInput", "supplierDeduction", "manual", "tarha"] as const;
 
 export const STOCK_OUT_PURPOSES = [
   "sold",
@@ -76,13 +78,9 @@ export const PRODUCT_TYPE_LABELS: Record<(typeof PRODUCT_TYPES)[number], string>
   other: "Other",
 };
 
-export const SUPPLIER_KIND_LABELS: Record<(typeof SUPPLIER_KINDS)[number], string> = {
-  vegetable: "Vegetable Supplier",
-  farmInput: "Farm Input Supplier",
-  both: "Vegetable + Farm Input",
-};
-
 export const EXPENSE_CATEGORY_LABELS: Record<(typeof EXPENSE_CATEGORIES)[number], string> = {
+  cashAdvance: "Cash Advance",
+  loan: "Loan",
   fertilizer: "Fertilizer",
   medicine: "Medicine",
   greenSolution: "Green Solutions",
@@ -98,8 +96,26 @@ export const EXPENSE_CATEGORY_LABELS: Record<(typeof EXPENSE_CATEGORIES)[number]
 export const EXPENSE_SOURCE_LABELS: Record<(typeof EXPENSE_SOURCES)[number], string> = {
   stockIn: "From Stock In",
   cropInput: "From Vegetables (Crop)",
+  supplierDeduction: "Supplier Deductions",
   manual: "Manual Expenses",
   tarha: "Tarha / Losses",
+};
+
+export const SUPPLIER_DEDUCTION_TYPES = ["cashAdvance", "loan", "transport", "packaging", "others"] as const;
+
+export const SUPPLIER_DEDUCTION_TYPE_LABELS: Record<(typeof SUPPLIER_DEDUCTION_TYPES)[number], string> = {
+  cashAdvance: "Cash Advance",
+  loan: "Loan",
+  transport: "Transport",
+  packaging: "Packaging",
+  others: "Others",
+};
+
+export const SUPPLIER_DEDUCTION_STATUSES = ["open", "settled"] as const;
+
+export const SUPPLIER_DEDUCTION_STATUS_LABELS: Record<(typeof SUPPLIER_DEDUCTION_STATUSES)[number], string> = {
+  open: "Open",
+  settled: "Settled",
 };
 
 export const STOCK_OUT_PURPOSE_LABELS: Record<(typeof STOCK_OUT_PURPOSES)[number], string> = {

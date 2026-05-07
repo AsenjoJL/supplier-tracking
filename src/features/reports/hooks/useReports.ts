@@ -4,6 +4,7 @@ import { useCrops } from "@/features/crop-monitoring/hooks/useCrops";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useStockIn } from "@/features/stock-in/hooks/useStockIn";
 import { useStockOut } from "@/features/stock-out/hooks/useStockOut";
+import { useSupplierDeductions } from "@/features/suppliers/hooks/useSupplierDeductions";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import {
   CROP_STATUS_LABELS,
@@ -11,6 +12,8 @@ import {
   LOW_STOCK_THRESHOLD,
   PRODUCT_TYPE_LABELS,
   PRODUCT_TYPES,
+  SUPPLIER_DEDUCTION_TYPE_LABELS,
+  SUPPLIER_DEDUCTION_TYPES,
   TARHA_REASON_LABELS,
   TARHA_REASONS,
 } from "@/lib/constants";
@@ -66,6 +69,7 @@ const getTrendPercent = (current: number, previous: number): number => {
 export function useReports(dateRange?: ReportDateRange) {
   const products = useProducts();
   const suppliers = useSuppliers();
+  const supplierDeductions = useSupplierDeductions();
   const stockIns = useStockIn();
   const stockOuts = useStockOut();
   const crops = useCrops();
@@ -74,6 +78,7 @@ export function useReports(dateRange?: ReportDateRange) {
     const range = normalizeReportDateRange(dateRange);
     const allProducts = products.data ?? [];
     const allSuppliers = suppliers.data ?? [];
+    const allSupplierDeductions = supplierDeductions.data ?? [];
     const allStockIns = stockIns.data ?? [];
     const allStockOuts = stockOuts.data ?? [];
     const harvestRows = (crops.data ?? []).filter((crop) => {
@@ -86,10 +91,13 @@ export function useReports(dateRange?: ReportDateRange) {
       );
     });
     const productsById = new Map(allProducts.map((product) => [product.id, product]));
+    const suppliersById = new Map(allSuppliers.map((supplier) => [supplier.id, supplier]));
     const stockInsToDate = allStockIns.filter((item) => item.date <= range.to);
     const stockOutsToDate = allStockOuts.filter((item) => item.date <= range.to);
     const periodStockIns = allStockIns.filter((item) => isWithinRange(item.date, range.from, range.to));
     const periodStockOuts = allStockOuts.filter((item) => isWithinRange(item.date, range.from, range.to));
+    const periodSupplierDeductions = allSupplierDeductions.filter((item) => isWithinRange(item.date, range.from, range.to));
+    const previousSupplierDeductions = allSupplierDeductions.filter((item) => isWithinRange(item.date, range.previousFrom, range.previousTo));
     const periodDays = eachDayOfInterval({ start: range.fromDate, end: range.toDate }).map((date) => ({
       iso: toISODate(date),
       label: format(date, "MMM d"),
@@ -144,6 +152,8 @@ export function useReports(dateRange?: ReportDateRange) {
     const previousTarhaDeductions = allStockIns
       .filter((item) => item.tarhaQty > 0 && isWithinRange(item.date, range.previousFrom, range.previousTo))
       .reduce((sum, item) => sum + getTarhaValue(item), 0);
+    const currentSupplierDeductions = periodSupplierDeductions.reduce((sum, item) => sum + item.amount, 0);
+    const previousSupplierDeductionsValue = previousSupplierDeductions.reduce((sum, item) => sum + item.amount, 0);
     const totalInventoryValue = stockRows.reduce((sum, row) => sum + row.inventoryValue, 0);
     const previousInventoryValue = inventoryValueAt(range.previousTo);
 
@@ -198,6 +208,14 @@ export function useReports(dateRange?: ReportDateRange) {
         detail: `${rowsByReason.length} ${rowsByReason.length === 1 ? "record" : "records"}`,
       };
     }).filter((row) => row.value > 0);
+    const supplierDeductionsByType = SUPPLIER_DEDUCTION_TYPES.map((type) => {
+      const rowsByType = periodSupplierDeductions.filter((row) => row.type === type);
+      return {
+        label: SUPPLIER_DEDUCTION_TYPE_LABELS[type],
+        value: rowsByType.reduce((sum, row) => sum + row.amount, 0),
+        detail: `${rowsByType.length} ${rowsByType.length === 1 ? "record" : "records"}`,
+      };
+    }).filter((row) => row.value > 0);
     const cropStatus = CROP_STATUSES.map((status) => {
       const count = harvestRows.filter((crop) => crop.status === status).length;
       return {
@@ -205,11 +223,18 @@ export function useReports(dateRange?: ReportDateRange) {
         value: count,
       };
     }).filter((row) => row.value > 0);
+    const supplierDeductionRows = periodSupplierDeductions
+      .map((deduction) => ({
+        deduction,
+        supplier: suppliersById.get(deduction.supplierId) ?? null,
+      }))
+      .sort((left, right) => right.deduction.date.localeCompare(left.deduction.date));
 
     return {
       stockRows,
       lowItems: stockRows.filter((row) => row.currentStock <= LOW_STOCK_THRESHOLD),
       tarhaRows,
+      supplierDeductionRows,
       harvestRows,
       analytics: {
         periodLabel: `${format(range.fromDate, "MMM d")} - ${format(range.toDate, "MMM d, yyyy")}`,
@@ -220,12 +245,14 @@ export function useReports(dateRange?: ReportDateRange) {
         stockMovementByType,
         topFastMovingItems,
         tarhaByReason,
+        supplierDeductionsByType,
         cropStatus,
         monthlySummary: {
           inventoryTrend: getTrendPercent(totalInventoryValue, previousInventoryValue),
           stockInTrend: getTrendPercent(currentStockInValue, previousStockInValue),
           stockOutTrend: getTrendPercent(currentStockOutValue, previousStockOutValue),
           tarhaTrend: getTrendPercent(currentTarhaDeductions, previousTarhaDeductions),
+          supplierDeductionTrend: getTrendPercent(currentSupplierDeductions, previousSupplierDeductionsValue),
           lowItemCount: stockRows.filter((row) => row.currentStock <= LOW_STOCK_THRESHOLD).length,
         },
       },
@@ -234,6 +261,7 @@ export function useReports(dateRange?: ReportDateRange) {
         totalStockInValue: currentStockInValue,
         totalStockOutValue: currentStockOutValue,
         tarhaDeductions: currentTarhaDeductions,
+        supplierDeductions: currentSupplierDeductions,
         stockInCount: allStockIns.length,
         stockOutCount: allStockOuts.length,
         activeCrops: harvestRows.filter((crop) => !["harvested", "failed"].includes(crop.status)).length,
@@ -242,10 +270,11 @@ export function useReports(dateRange?: ReportDateRange) {
           stockIn: getTrendPercent(currentStockInValue, previousStockInValue),
           stockOut: getTrendPercent(currentStockOutValue, previousStockOutValue),
           tarha: getTrendPercent(currentTarhaDeductions, previousTarhaDeductions),
+          supplierDeductions: getTrendPercent(currentSupplierDeductions, previousSupplierDeductionsValue),
         },
       },
     };
-  }, [crops.data, dateRange?.from, dateRange?.to, products.data, stockIns.data, stockOuts.data, suppliers.data]);
+  }, [crops.data, dateRange?.from, dateRange?.to, products.data, stockIns.data, stockOuts.data, supplierDeductions.data, suppliers.data]);
 
   return {
     ...data,
@@ -253,6 +282,6 @@ export function useReports(dateRange?: ReportDateRange) {
     suppliers: suppliers.data ?? [],
     stockIns: stockIns.data ?? [],
     stockOuts: stockOuts.data ?? [],
-    isLoading: products.isLoading || suppliers.isLoading || stockIns.isLoading || stockOuts.isLoading || crops.isLoading,
+    isLoading: products.isLoading || suppliers.isLoading || supplierDeductions.isLoading || stockIns.isLoading || stockOuts.isLoading || crops.isLoading,
   };
 }

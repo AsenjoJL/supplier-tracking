@@ -1,4 +1,4 @@
-import { ArrowDownToLine, ArrowUpFromLine, Scale, WalletCards } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, HandCoins, Scale, WalletCards } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn, formatCurrency } from "@/lib/utils";
 
@@ -7,11 +7,13 @@ type ReportSummaryCardsProps = {
   totalStockInValue: number;
   totalStockOutValue: number;
   tarhaDeductions: number;
+  supplierDeductions: number;
   trends: {
     inventory: number;
     stockIn: number;
     stockOut: number;
     tarha: number;
+    supplierDeductions: number;
   };
 };
 
@@ -35,6 +37,12 @@ const cards = [
     tone: "amber",
   },
   {
+    key: "supplierDeductions",
+    label: "Supplier Deductions",
+    icon: HandCoins,
+    tone: "leaf",
+  },
+  {
     key: "tarha",
     label: "Tarha / Losses",
     icon: Scale,
@@ -44,6 +52,7 @@ const cards = [
 
 const toneClasses = {
   green: "bg-leaf-100 text-leaf-700",
+  leaf: "bg-emerald-100 text-emerald-700",
   blue: "bg-sky-100 text-sky-700",
   amber: "bg-amber-100 text-amber-700",
   red: "bg-red-100 text-red-700",
@@ -54,17 +63,19 @@ export function ReportSummaryCards({
   totalStockInValue,
   totalStockOutValue,
   tarhaDeductions,
+  supplierDeductions,
   trends,
 }: ReportSummaryCardsProps) {
   const values = {
     inventory: totalInventoryValue,
     stockIn: totalStockInValue,
     stockOut: totalStockOutValue,
+    supplierDeductions,
     tarha: tarhaDeductions,
   };
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       {cards.map((card) => {
         const Icon = card.icon;
         const trend = trends[card.key];

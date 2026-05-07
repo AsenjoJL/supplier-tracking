@@ -10,13 +10,11 @@ import {
   PRODUCT_TARHA_PERCENT_OPTIONS,
   PRODUCT_TYPE_LABELS,
   PRODUCT_TYPES,
-  SUPPLIER_KINDS,
   UNIT_OPTIONS,
 } from "@/lib/constants";
 import { productSchema } from "@/features/products/schemas/product.schema";
 import type { Product, ProductFormValues, ProductType } from "@/features/products/types/product.types";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
-import type { SupplierKind } from "@/features/suppliers/types/supplier.types";
 import { computeTarhaPricing, formatCurrency } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
 
@@ -38,7 +36,6 @@ type ProductFormProps = {
   pending?: boolean;
   title?: string;
   allowedTypes?: readonly ProductType[];
-  allowedSupplierKinds?: readonly SupplierKind[];
   catalogOptions?: readonly ProductFormValues[];
   defaultValuesOverride?: Partial<ProductFormValues>;
   onOpenChange: (open: boolean) => void;
@@ -51,7 +48,6 @@ export function ProductForm({
   pending = false,
   title,
   allowedTypes = PRODUCT_TYPES,
-  allowedSupplierKinds = SUPPLIER_KINDS,
   catalogOptions = [],
   defaultValuesOverride,
   onOpenChange,
@@ -75,19 +71,10 @@ export function ProductForm({
   const deductionAmount = Number(form.watch("deductionAmount") || 0);
   const finalPrice = Number(form.watch("finalPrice") || 0);
   const usesTarhaPricing = selectedType === "vegetable";
-  const supplierKindsForSelectedType = useMemo<readonly SupplierKind[]>(() => {
-    const typeMatchedKinds: readonly SupplierKind[] =
-      selectedType === "vegetable"
-        ? ["vegetable", "both"]
-        : (FARM_INPUT_TYPES as readonly ProductType[]).includes(selectedType)
-          ? ["farmInput", "both"]
-          : SUPPLIER_KINDS;
-
-    return typeMatchedKinds.filter((kind) => allowedSupplierKinds.includes(kind));
-  }, [allowedSupplierKinds, selectedType]);
+  const productAllowsSupplier = selectedType === "vegetable" || !(FARM_INPUT_TYPES as readonly ProductType[]).includes(selectedType);
   const selectableSuppliers = useMemo(
-    () => (suppliers.data ?? []).filter((supplier) => supplierKindsForSelectedType.includes(supplier.supplierKind ?? "vegetable")),
-    [supplierKindsForSelectedType, suppliers.data],
+    () => (productAllowsSupplier ? suppliers.data ?? [] : []),
+    [productAllowsSupplier, suppliers.data],
   );
 
   useEffect(() => {
@@ -141,11 +128,10 @@ export function ProductForm({
     const selectedSupplier = suppliers.data?.find((supplier) => supplier.id === supplierId);
     if (!selectedSupplier) return;
 
-    const selectedSupplierKind = selectedSupplier.supplierKind ?? "vegetable";
-    if (!supplierKindsForSelectedType.includes(selectedSupplierKind)) {
+    if (!productAllowsSupplier || (selectedSupplier.supplierKind ?? "vegetable") !== "vegetable") {
       form.setValue("supplierId", "", { shouldDirty: true, shouldValidate: true });
     }
-  }, [form, supplierKindsForSelectedType, suppliers.data]);
+  }, [form, productAllowsSupplier, suppliers.data]);
 
   const applyCatalogProduct = (productName: string) => {
     const selectedProduct = selectableCatalogProducts.find((item) => item.name === productName);

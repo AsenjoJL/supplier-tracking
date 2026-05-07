@@ -4,6 +4,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { SupplierProfileActivity } from "@/features/suppliers/components/SupplierProfileActivity";
 import { SupplierProfileCrops } from "@/features/suppliers/components/SupplierProfileCrops";
+import { SupplierProfileDeductions } from "@/features/suppliers/components/SupplierProfileDeductions";
 import { SupplierProfileHeader } from "@/features/suppliers/components/SupplierProfileHeader";
 import { SupplierProfileProducts } from "@/features/suppliers/components/SupplierProfileProducts";
 import { useSupplierDetail } from "@/features/suppliers/hooks/useSupplierDetail";
@@ -25,7 +26,6 @@ export function SupplierProfilePanel({
 }: SupplierProfilePanelProps) {
   const detail = useSupplierDetail(supplierId);
   const hasHeader = Boolean(heading || description || actions || onClose);
-  const showCropMonitoring = (detail.supplier?.supplierKind ?? "vegetable") === "vegetable";
 
   return (
     <div className="rounded-lg border bg-background p-4 shadow-sm">
@@ -54,10 +54,16 @@ export function SupplierProfilePanel({
             activeCropCount={detail.ongoingCrops.length}
             totalStock={detail.totalStock}
             totalInventoryValue={detail.totalInventoryValue}
-            showCropMetrics={showCropMonitoring}
+            openDeductionsTotal={detail.openDeductionsTotal}
+          />
+          <SupplierProfileDeductions
+            supplierId={supplierId}
+            deductions={detail.deductionRecords}
+            openTotal={detail.openDeductionsTotal}
+            settledTotal={detail.settledDeductionsTotal}
           />
           <SupplierProfileProducts productStock={detail.productStock} />
-          {showCropMonitoring ? <SupplierProfileCrops crops={detail.cropRecords} /> : null}
+          <SupplierProfileCrops crops={detail.cropRecords} />
           <SupplierProfileActivity stockInRecords={detail.stockInRecords} stockOutRecords={detail.stockOutRecords} />
         </div>
       ) : null}

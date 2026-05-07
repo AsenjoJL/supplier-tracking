@@ -68,11 +68,11 @@ export function ProductList() {
     else mutations.createProduct.mutate(values, { onSuccess: () => setFormOpen(false) });
   };
 
-  const baseColumns: DataTableColumn<ProductRow>[] = [
+  const productColumns: DataTableColumn<ProductRow>[] = [
     { id: "name", header: "Product", sortable: true, sortValue: (row) => row.name, cell: (row) => <div><p className="font-medium">{row.name}</p><p className="text-xs text-muted-foreground">{row.id}</p></div> },
-    { id: "supplier", header: "Supplier", cell: (row) => <span className="text-sm">{row.supplierName}</span> },
     { id: "price", header: "Original Price", sortable: true, sortValue: (row) => row.price, cell: (row) => formatCurrency(row.price) },
   ];
+  const supplierColumn: DataTableColumn<ProductRow> = { id: "supplier", header: "Supplier", cell: (row) => <span className="text-sm">{row.supplierName}</span> };
   const tarhaColumns: DataTableColumn<ProductRow>[] = [
     { id: "tarha", header: "Tarha Percent", sortable: true, sortValue: (row) => row.tarhaPercent, cell: (row) => `${row.tarhaPercent}%` },
     { id: "deduction", header: "Deduction", sortable: true, sortValue: (row) => row.deductionAmount, cell: (row) => formatCurrency(row.deductionAmount) },
@@ -92,8 +92,8 @@ export function ProductList() {
       ),
     },
   ];
-  const vegetableColumns = [...baseColumns, ...tarhaColumns, ...trailingColumns];
-  const farmInputColumns = [...baseColumns, ...trailingColumns];
+  const vegetableColumns = [productColumns[0], supplierColumn, productColumns[1], ...tarhaColumns, ...trailingColumns];
+  const farmInputColumns = [...productColumns, ...trailingColumns];
 
   if (products.isLoading || suppliers.isLoading || stockIns.isLoading || stockOuts.isLoading) return <LoadingSpinner />;
 

@@ -9,6 +9,8 @@ import { useStockOut } from "@/features/stock-out/hooks/useStockOut";
 import type { StockOut } from "@/features/stock-out/types/stock-out.types";
 import { computeNetStockInQty, computeStockBalance } from "@/lib/utils";
 import type { FirestoreDoc } from "@/types/global.types";
+import type { SupplierDeduction } from "../types/supplier-deduction.types";
+import { useSupplierDeductions } from "./useSupplierDeductions";
 import { useSuppliers } from "./useSuppliers";
 
 export type SupplierProductStock = {
@@ -30,6 +32,7 @@ export type SupplierStockOutRecord = FirestoreDoc<StockOut> & {
 
 export function useSupplierDetail(supplierId: string | null) {
   const suppliers = useSuppliers();
+  const deductions = useSupplierDeductions();
   const products = useProducts();
   const crops = useCrops();
   const stockIns = useStockIn();
@@ -37,6 +40,9 @@ export function useSupplierDetail(supplierId: string | null) {
 
   return useMemo(() => {
     const supplier = suppliers.data?.find((item) => item.id === supplierId) ?? null;
+    const deductionRecords = (deductions.data ?? [])
+      .filter((item) => item.supplierId === supplierId)
+      .sort((a, b) => b.date.localeCompare(a.date));
     const linkedProducts = products.data?.filter((item) => item.supplierId === supplierId) ?? [];
     const linkedProductIds = new Set(linkedProducts.map((product) => product.id));
     const cropRecords = (crops.data ?? [])
@@ -85,9 +91,16 @@ export function useSupplierDetail(supplierId: string | null) {
       .sort((a, b) => b.date.localeCompare(a.date));
     const totalStock = productStock.reduce((sum, item) => sum + item.stock, 0);
     const totalInventoryValue = productStock.reduce((sum, item) => sum + item.stock * (item.product.finalPrice ?? item.product.price), 0);
+    const openDeductionsTotal = deductionRecords
+      .filter((item) => item.status === "open")
+      .reduce((sum, item) => sum + item.amount, 0);
+    const settledDeductionsTotal = deductionRecords
+      .filter((item) => item.status === "settled")
+      .reduce((sum, item) => sum + item.amount, 0);
 
     return {
       supplier,
+      deductionRecords: deductionRecords as FirestoreDoc<SupplierDeduction>[],
       productStock,
       cropRecords: cropRecords as FirestoreDoc<Crop>[],
       ongoingCrops,
@@ -95,11 +108,15 @@ export function useSupplierDetail(supplierId: string | null) {
       stockOutRecords,
       totalStock,
       totalInventoryValue,
-      isLoading: suppliers.isLoading || products.isLoading || crops.isLoading || stockIns.isLoading || stockOuts.isLoading,
+      openDeductionsTotal,
+      settledDeductionsTotal,
+      isLoading: suppliers.isLoading || deductions.isLoading || products.isLoading || crops.isLoading || stockIns.isLoading || stockOuts.isLoading,
     };
   }, [
     crops.data,
     crops.isLoading,
+    deductions.data,
+    deductions.isLoading,
     products.data,
     products.isLoading,
     stockIns.data,

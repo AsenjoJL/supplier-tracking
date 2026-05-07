@@ -33,7 +33,7 @@ export function ReportAnalytics({ analytics }: { analytics: ReportsAnalytics }) 
         <InventoryValueChart rows={analytics.inventoryValueOverTime} />
         <StockMovementBarChart rows={analytics.stockMovementOverTime} />
       </div>
-      <div className="grid gap-6 xl:grid-cols-3">
+      <div className="grid gap-6 xl:grid-cols-2 2xl:grid-cols-4">
         <DonutBreakdown
           title="Inventory by Category"
           description="Current inventory value grouped by product type."
@@ -44,6 +44,15 @@ export function ReportAnalytics({ analytics }: { analytics: ReportsAnalytics }) 
           emptyMessage="No inventory value to chart yet."
         />
         <FastMovingItems rows={analytics.topFastMovingItems} />
+        <DonutBreakdown
+          title="Supplier Deductions"
+          description="Cash advances, loans, and other supplier deductions."
+          rows={analytics.supplierDeductionsByType}
+          centerLabel="Total"
+          centerValue={formatShortCurrency(analytics.supplierDeductionsByType.reduce((sum, row) => sum + row.value, 0))}
+          valueFormatter={formatCurrency}
+          emptyMessage="No supplier deductions recorded for this period."
+        />
         <DonutBreakdown
           title="Tarha / Losses by Reason"
           description="Tarha value grouped by quality reason."

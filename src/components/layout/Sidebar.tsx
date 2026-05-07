@@ -1,8 +1,7 @@
-import { CalendarDays, ChartNoAxesCombined, ClipboardList, LayoutDashboard, Package, ReceiptText, Sprout, Truck, Users, Wheat, Warehouse, X } from "lucide-react";
+import { CalendarDays, ChartNoAxesCombined, ClipboardList, HandCoins, LayoutDashboard, Package, ReceiptText, Sprout, Truck, Users, Wheat, Warehouse, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useDashboardMetrics } from "@/features/dashboard/hooks/useDashboardMetrics";
-import { useFarmInputBadgeCount } from "@/features/farm-inputs/hooks/useFarmInputBadgeCount";
 import { cn, todayISO } from "@/lib/utils";
 import { useUIStore } from "@/stores/useUIStore";
 
@@ -13,7 +12,7 @@ const links = [
   { to: "/open-listing", label: "Open Listing", icon: ClipboardList },
   { to: "/stock-in", label: "Stock In", icon: Warehouse },
   { to: "/stock-out", label: "Stock Out", icon: Truck },
-  { to: "/farm-inputs", label: "Farm Inputs", icon: Sprout, section: "Farm" },
+  { to: "/deductions", label: "Deductions", icon: HandCoins, section: "Farm" },
   { to: "/crop-monitoring", label: "Crop Monitoring", icon: Wheat },
   { to: "/harvest-calendar", label: "Harvest Calendar", icon: CalendarDays },
   { to: "/tarha", label: "Tarha", icon: ClipboardList, section: "Quality" },
@@ -25,7 +24,6 @@ export function Sidebar() {
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
   const mobileSidebarOpen = useUIStore((state) => state.mobileSidebarOpen);
   const closeMobileSidebar = useUIStore((state) => state.closeMobileSidebar);
-  const lowFarmInputCount = useFarmInputBadgeCount();
   const metrics = useDashboardMetrics();
   let previousSection = "";
   const upcomingCount = metrics.upcomingHarvest.filter((crop) => crop.forecastHarvest >= todayISO()).length;
@@ -71,7 +69,7 @@ export function Sidebar() {
             const showSection = link.section && link.section !== previousSection;
             if (link.section) previousSection = link.section;
             const Icon = link.icon;
-            const badgeCount = link.to === "/farm-inputs" ? lowFarmInputCount : link.to === "/harvest-calendar" ? upcomingCount : 0;
+            const badgeCount = link.to === "/harvest-calendar" ? upcomingCount : 0;
             return (
               <div key={link.to}>
                 {showSection ? (

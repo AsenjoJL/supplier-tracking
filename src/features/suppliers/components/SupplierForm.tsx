@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supplierSchema } from "@/features/suppliers/schemas/supplier.schema";
 import type { Supplier, SupplierFormValues } from "@/features/suppliers/types/supplier.types";
-import { SUPPLIER_KIND_LABELS, SUPPLIER_KINDS } from "@/lib/constants";
 import type { FirestoreDoc } from "@/types/global.types";
 
 const defaults: SupplierFormValues = {
@@ -38,7 +37,7 @@ export function SupplierForm({ open, supplier, pending = false, onOpenChange, on
   useEffect(() => {
     form.reset(supplier ? {
       name: supplier.name,
-      supplierKind: supplier.supplierKind ?? "vegetable",
+      supplierKind: "vegetable",
       contactPerson: supplier.contactPerson,
       phone: supplier.phone,
       email: supplier.email,
@@ -54,6 +53,7 @@ export function SupplierForm({ open, supplier, pending = false, onOpenChange, on
           <DialogTitle>{supplier ? "Edit Supplier" : "Add Supplier"}</DialogTitle>
         </DialogHeader>
         <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+          <input type="hidden" {...form.register("supplierKind")} />
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="supplier-name">Supplier name</Label>
@@ -67,14 +67,6 @@ export function SupplierForm({ open, supplier, pending = false, onOpenChange, on
                 <option value="inactive">Inactive</option>
               </select>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="supplier-kind">Supplier type</Label>
-            <select id="supplier-kind" className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm" {...form.register("supplierKind")}>
-              {SUPPLIER_KINDS.map((kind) => (
-                <option key={kind} value={kind}>{SUPPLIER_KIND_LABELS[kind]}</option>
-              ))}
-            </select>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">

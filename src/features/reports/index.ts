@@ -3,6 +3,7 @@ export * from "./components/ReportAnalytics";
 export * from "./components/ReportSummaryCards";
 export * from "./components/ReportDateRangeFilter";
 export * from "./components/tabs/InventoryReportTab";
+export * from "./components/tabs/SupplierDeductionsReportTab";
 export * from "./components/tabs/TarhaReportTab";
 export * from "./components/tabs/HarvestReportTab";
 export * from "./components/tabs/RestockReportTab";
