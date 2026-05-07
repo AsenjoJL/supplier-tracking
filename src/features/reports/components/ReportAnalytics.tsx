@@ -46,7 +46,7 @@ export function ReportAnalytics({ analytics }: { analytics: ReportsAnalytics }) 
         <FastMovingItems rows={analytics.topFastMovingItems} />
         <DonutBreakdown
           title="Supplier Deductions"
-          description="Cash advances, loans, and other supplier deductions."
+          description="Cash, loans, and calculated farm input deductions."
           rows={analytics.supplierDeductionsByType}
           centerLabel="Total"
           centerValue={formatShortCurrency(analytics.supplierDeductionsByType.reduce((sum, row) => sum + row.value, 0))}
@@ -62,6 +62,10 @@ export function ReportAnalytics({ analytics }: { analytics: ReportsAnalytics }) 
           valueFormatter={formatCurrency}
           emptyMessage="No Tarha losses recorded yet."
         />
+      </div>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <InputDeductionProducts rows={analytics.supplierInputDeductionsByProduct} />
+        <DeductionCalculationGuide />
       </div>
       <MonthlySummary analytics={analytics} />
     </div>
@@ -246,6 +250,52 @@ function FastMovingItems({ rows }: { rows: BreakdownRow[] }) {
       ) : (
         <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">No product movement yet.</p>
       )}
+    </SectionCard>
+  );
+}
+
+function InputDeductionProducts({ rows }: { rows: BreakdownRow[] }) {
+  const maxValue = Math.max(...rows.map((row) => row.value), 1);
+
+  return (
+    <SectionCard title="Input Deductions by Product" description="Supplier deductions for abuno, fertilizer, medicine, green solution, and seeds.">
+      {rows.length > 0 ? (
+        <div className="space-y-4">
+          {rows.map((row) => (
+            <div key={row.label} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 text-sm">
+              <div className="min-w-0">
+                <div className="mb-1 flex items-center justify-between gap-3">
+                  <p className="truncate font-medium">{row.label}</p>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.max(8, (row.value / maxValue) * 100)}%` }} />
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{row.detail}</p>
+              </div>
+              <p className="font-semibold">{formatCurrency(row.value)}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">No input deductions recorded for this period.</p>
+      )}
+    </SectionCard>
+  );
+}
+
+function DeductionCalculationGuide() {
+  return (
+    <SectionCard title="Deduction Calculation" description="How supplier deductions are reflected in reports.">
+      <div className="grid gap-3 text-sm sm:grid-cols-2">
+        <div className="rounded-md border bg-muted/20 p-3">
+          <p className="font-medium">Cash, loan, transport</p>
+          <p className="mt-1 text-xs text-muted-foreground">These deduction types use the saved amount directly.</p>
+        </div>
+        <div className="rounded-md border bg-muted/20 p-3">
+          <p className="font-medium">Farm input deductions</p>
+          <p className="mt-1 text-xs text-muted-foreground">Abuno, fertilizer, medicine, green solution, and seeds use quantity times unit price.</p>
+        </div>
+      </div>
     </SectionCard>
   );
 }

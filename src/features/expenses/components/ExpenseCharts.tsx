@@ -8,6 +8,8 @@ type BreakdownRow = ExpenseData["analytics"]["breakdownBySource"][number];
 type OverTimeRow = ExpenseData["analytics"]["overTime"][number];
 type CategoryRow = ExpenseData["analytics"]["byCategory"][number];
 type CropRow = ExpenseData["analytics"]["byCrop"][number];
+type SupplierDeductionTypeRow = ExpenseData["analytics"]["supplierDeductionsByType"][number];
+type SupplierInputProductRow = ExpenseData["analytics"]["supplierInputDeductionsByProduct"][number];
 
 const chartColors = ["#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#2f6f40", "#94a3b8"];
 const sourceColors = {
@@ -37,6 +39,11 @@ export function ExpenseCharts({ data }: { data: ExpenseData }) {
       </div>
       <div className="space-y-6">
         <CategoryBreakdown rows={data.analytics.byCategory} total={data.summary.totalExpenses} />
+        <SupplierDeductionBreakdown
+          typeRows={data.analytics.supplierDeductionsByType}
+          productRows={data.analytics.supplierInputDeductionsByProduct}
+          total={data.summary.supplierDeductions}
+        />
         <CropExpenseBreakdown rows={data.analytics.byCrop} total={data.analytics.byCrop.reduce((sum, row) => sum + row.value, 0)} />
         <ExpenseGuide />
         <ExpenseTip />
@@ -153,6 +160,65 @@ function CategoryBreakdown({ rows, total }: { rows: CategoryRow[]; total: number
   );
 }
 
+function SupplierDeductionBreakdown({
+  typeRows,
+  productRows,
+  total,
+}: {
+  typeRows: SupplierDeductionTypeRow[];
+  productRows: SupplierInputProductRow[];
+  total: number;
+}) {
+  const maxProductValue = Math.max(...productRows.map((row) => row.value), 1);
+
+  return (
+    <SectionCard title="Supplier Deductions" description="Cash, loan, and calculated farm input deductions.">
+      {typeRows.length > 0 ? (
+        <div className="space-y-3">
+          {typeRows.map((row) => {
+            const percent = Math.round((row.value / Math.max(total, 1)) * 100);
+            return (
+              <div key={row.category} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b pb-2 text-sm last:border-0 last:pb-0">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{row.label}</p>
+                  <p className="text-xs text-muted-foreground">{row.detail}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{formatCurrency(row.value)}</p>
+                  <p className="text-xs text-muted-foreground">{percent}%</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">No supplier deductions in this period.</p>
+      )}
+      {productRows.length > 0 ? (
+        <div className="mt-5 border-t pt-4">
+          <p className="mb-3 text-sm font-semibold">Input deductions by product</p>
+          <div className="space-y-3">
+            {productRows.map((row) => (
+              <div key={row.label} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 text-sm">
+                <div className="min-w-0">
+                  <div className="mb-1 flex items-center justify-between gap-3">
+                    <p className="truncate font-medium">{row.label}</p>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                    <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.max(8, (row.value / maxProductValue) * 100)}%` }} />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{row.detail}</p>
+                </div>
+                <p className="font-semibold">{formatCurrency(row.value)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </SectionCard>
+  );
+}
+
 function CropExpenseBreakdown({ rows, total }: { rows: CropRow[]; total: number }) {
   const maxValue = Math.max(...rows.map((row) => row.value), 1);
 
@@ -190,7 +256,7 @@ function ExpenseGuide() {
       <div className="grid gap-3 text-sm md:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
         <GuideItem title="From Stock In" text="Purchases are recorded from stock-in transaction final prices." />
         <GuideItem title="From Vegetables" text="Allocated crop inputs are valued from the linked product unit price." />
-        <GuideItem title="Supplier Deductions" text="Cash advances, loans, and supplier deductions are pulled from supplier profiles." />
+        <GuideItem title="Supplier Deductions" text="Cash and loan deductions use the saved amount. Farm input deductions calculate quantity times unit price from supplier profiles." />
         <GuideItem title="Manual Expenses" text="Labor, transportation, utilities, and other non-inventory costs are added manually." />
       </div>
     </SectionCard>

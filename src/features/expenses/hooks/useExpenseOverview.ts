@@ -11,7 +11,7 @@ import { useSupplierDeductions } from "@/features/suppliers/hooks/useSupplierDed
 import { isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import { EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORIES, EXPENSE_SOURCE_LABELS, EXPENSE_SOURCES, SUPPLIER_DEDUCTION_TYPE_LABELS } from "@/lib/constants";
-import { computeStockInPricing } from "@/lib/utils";
+import { computeStockInPricing, roundNumber } from "@/lib/utils";
 import type { SupplierDeductionType } from "@/features/suppliers/types/supplier-deduction.types";
 
 export type ExpenseDateRange = {
@@ -84,6 +84,7 @@ export function useExpenseOverview(range: ExpenseDateRange) {
       const product = productMap.get(productId);
       return product?.finalPrice ?? product?.price ?? 0;
     };
+    const allSupplierDeductions = supplierDeductions.data ?? [];
     const sourceRows: ExpenseRow[] = [
       ...(stockIns.data ?? []).map((stockIn): ExpenseRow => {
         const product = productMap.get(stockIn.productId);
@@ -136,7 +137,7 @@ export function useExpenseOverview(range: ExpenseDateRange) {
         supplierOrRemarks: expense.remarks || "Manual expense",
         manualExpenseId: expense.id,
       })),
-      ...(supplierDeductions.data ?? []).map((deduction): ExpenseRow => {
+      ...allSupplierDeductions.map((deduction): ExpenseRow => {
         const supplier = supplierMap.get(deduction.supplierId);
         const isInputDeduction = isSupplierInputDeductionType(deduction.type);
         return {
@@ -179,6 +180,7 @@ export function useExpenseOverview(range: ExpenseDateRange) {
       .filter((row) => isWithinRange(row.date, normalized.from, normalized.to))
       .sort((left, right) => right.date.localeCompare(left.date));
     const previousRows = sourceRows.filter((row) => isWithinRange(row.date, normalized.previousFrom, normalized.previousTo));
+    const periodSupplierDeductions = allSupplierDeductions.filter((deduction) => isWithinRange(deduction.date, normalized.from, normalized.to));
     const totalForSource = (source: ExpenseSource, items = rows): number => items.filter((row) => row.source === source).reduce((sum, row) => sum + row.amount, 0);
     const totalExpenses = rows.reduce((sum, row) => sum + row.amount, 0);
     const previousTotalExpenses = previousRows.reduce((sum, row) => sum + row.amount, 0);
@@ -203,6 +205,45 @@ export function useExpenseOverview(range: ExpenseDateRange) {
         .reduce((map, row) => map.set(row.cropName, (map.get(row.cropName) ?? 0) + row.amount), new Map<string, number>()),
     )
       .map(([label, value]) => ({ label, value }))
+      .sort((left, right) => right.value - left.value)
+      .slice(0, 6);
+    const supplierDeductionRows = rows.filter((row) => row.source === "supplierDeduction");
+    const supplierDeductionsByType = EXPENSE_CATEGORIES.map((category) => {
+      const categoryRows = supplierDeductionRows.filter((row) => row.category === category);
+      return {
+        label: EXPENSE_CATEGORY_LABELS[category],
+        category,
+        value: categoryRows.reduce((sum, row) => sum + row.amount, 0),
+        detail: `${categoryRows.length} ${categoryRows.length === 1 ? "record" : "records"}`,
+      };
+    }).filter((item) => item.value > 0);
+    const supplierInputDeductionsByProduct = Array.from(
+      periodSupplierDeductions
+        .filter((deduction) => isSupplierInputDeductionType(deduction.type))
+        .reduce((map, deduction) => {
+          const key = deduction.inputProductId || deduction.inputProductName || deduction.type;
+          const existing = map.get(key) ?? {
+            label: deduction.inputProductName || SUPPLIER_DEDUCTION_TYPE_LABELS[deduction.type],
+            value: 0,
+            quantity: 0,
+            unit: deduction.inputUnit || "unit",
+            records: 0,
+          };
+          const deductionUnit = deduction.inputUnit || "unit";
+          existing.value += deduction.amount;
+          existing.quantity += deduction.inputQty ?? 0;
+          existing.records += 1;
+          existing.unit = existing.unit === deductionUnit ? existing.unit : "mixed units";
+          map.set(key, existing);
+          return map;
+        }, new Map<string, { label: string; value: number; quantity: number; unit: string; records: number }>())
+        .values(),
+    )
+      .map((row) => ({
+        label: row.label,
+        value: row.value,
+        detail: `${roundNumber(row.quantity)} ${row.unit}, ${row.records} ${row.records === 1 ? "record" : "records"}`,
+      }))
       .sort((left, right) => right.value - left.value)
       .slice(0, 6);
     const overTime = days.map((day) => ({
@@ -240,6 +281,8 @@ export function useExpenseOverview(range: ExpenseDateRange) {
         overTime,
         byCategory,
         byCrop,
+        supplierDeductionsByType,
+        supplierInputDeductionsByProduct,
       },
     };
   }, [crops.data, manualExpenses.data, products.data, range.from, range.to, stockIns.data, stockOuts.data, supplierDeductions.data, suppliers.data]);

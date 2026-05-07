@@ -5,6 +5,7 @@ import { useProducts } from "@/features/products/hooks/useProducts";
 import { useStockIn } from "@/features/stock-in/hooks/useStockIn";
 import { useStockOut } from "@/features/stock-out/hooks/useStockOut";
 import { useSupplierDeductions } from "@/features/suppliers/hooks/useSupplierDeductions";
+import { isSupplierInputDeductionType } from "@/features/suppliers/lib/supplierDeductionUtils";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import {
   CROP_STATUS_LABELS,
@@ -17,7 +18,7 @@ import {
   TARHA_REASON_LABELS,
   TARHA_REASONS,
 } from "@/lib/constants";
-import { computeNetStockInQty, computeStockBalance, computeStockInPricing } from "@/lib/utils";
+import { computeNetStockInQty, computeStockBalance, computeStockInPricing, roundNumber } from "@/lib/utils";
 
 const toISODate = (date: Date): string => format(date, "yyyy-MM-dd");
 
@@ -216,6 +217,35 @@ export function useReports(dateRange?: ReportDateRange) {
         detail: `${rowsByType.length} ${rowsByType.length === 1 ? "record" : "records"}`,
       };
     }).filter((row) => row.value > 0);
+    const supplierInputDeductionsByProduct = Array.from(
+      periodSupplierDeductions
+        .filter((deduction) => isSupplierInputDeductionType(deduction.type))
+        .reduce((map, deduction) => {
+          const key = deduction.inputProductId || deduction.inputProductName || deduction.type;
+          const existing = map.get(key) ?? {
+            label: deduction.inputProductName || SUPPLIER_DEDUCTION_TYPE_LABELS[deduction.type],
+            value: 0,
+            quantity: 0,
+            unit: deduction.inputUnit || "unit",
+            records: 0,
+          };
+          const deductionUnit = deduction.inputUnit || "unit";
+          existing.value += deduction.amount;
+          existing.quantity += deduction.inputQty ?? 0;
+          existing.records += 1;
+          existing.unit = existing.unit === deductionUnit ? existing.unit : "mixed units";
+          map.set(key, existing);
+          return map;
+        }, new Map<string, { label: string; value: number; quantity: number; unit: string; records: number }>())
+        .values(),
+    )
+      .map((row) => ({
+        label: row.label,
+        value: row.value,
+        detail: `${roundNumber(row.quantity)} ${row.unit}, ${row.records} ${row.records === 1 ? "record" : "records"}`,
+      }))
+      .sort((left, right) => right.value - left.value)
+      .slice(0, 8);
     const cropStatus = CROP_STATUSES.map((status) => {
       const count = harvestRows.filter((crop) => crop.status === status).length;
       return {
@@ -246,6 +276,7 @@ export function useReports(dateRange?: ReportDateRange) {
         topFastMovingItems,
         tarhaByReason,
         supplierDeductionsByType,
+        supplierInputDeductionsByProduct,
         cropStatus,
         monthlySummary: {
           inventoryTrend: getTrendPercent(totalInventoryValue, previousInventoryValue),

@@ -33,7 +33,7 @@ const downloadCsv = (rows: ExpenseRow[]) => {
     row.itemName,
     row.cropName,
     row.qtyLabel,
-    row.unitPrice,
+    row.qtyLabel === "—" ? "" : row.unitPrice,
     row.amount,
     row.supplierOrRemarks,
   ]);
@@ -79,7 +79,11 @@ export function ExpenseOverview() {
     { id: "item", header: "Item Name", cell: (row) => <p className="font-medium">{row.itemName}</p> },
     { id: "crop", header: "Crop", cell: (row) => row.cropName },
     { id: "qty", header: "Qty", cell: (row) => row.qtyLabel },
-    { id: "unitPrice", header: "Unit Price", cell: (row) => formatCurrency(row.unitPrice) },
+    {
+      id: "unitPrice",
+      header: "Unit Price",
+      cell: (row) => row.qtyLabel === "—" ? <span className="text-sm text-muted-foreground">—</span> : formatCurrency(row.unitPrice),
+    },
     { id: "amount", header: "Total", sortable: true, sortValue: (row) => row.amount, cell: (row) => <span className="font-semibold">{formatCurrency(row.amount)}</span> },
     { id: "remarks", header: "Supplier / Remarks", cell: (row) => <span className="text-sm text-muted-foreground">{row.supplierOrRemarks}</span> },
     {
