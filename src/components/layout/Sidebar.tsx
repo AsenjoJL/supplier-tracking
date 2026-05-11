@@ -1,4 +1,4 @@
-import { CalendarDays, ChartNoAxesCombined, ClipboardList, HandCoins, LayoutDashboard, Package, ReceiptText, Sprout, Truck, Users, Wheat, Warehouse, X } from "lucide-react";
+import { CalendarDays, ChartNoAxesCombined, ClipboardList, HandCoins, LayoutDashboard, Package, ReceiptText, Truck, Users, Wheat, Warehouse, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useDashboardMetrics } from "@/features/dashboard/hooks/useDashboardMetrics";
@@ -47,8 +47,8 @@ export function Sidebar() {
       >
         <div className="border-b border-leaf-600 px-5 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-soil-100 text-leaf-700">
-              <Sprout className="h-5 w-5" />
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-soil-100">
+              <img src="/lgo.png" alt="Hazel AgriTrack" className="h-full w-full object-cover" />
             </div>
             <div className={cn(!sidebarOpen && "md:hidden")}>
               <p className="font-serif text-2xl leading-none">Hazel AgriTrack</p>

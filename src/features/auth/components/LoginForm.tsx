@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Leaf } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -80,8 +79,8 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-md bg-leaf-100 text-leaf-700">
-          <Leaf className="h-5 w-5" />
+        <div className="mb-2 flex h-11 w-11 items-center justify-center overflow-hidden rounded-md bg-leaf-100">
+          <img src="/lgo.png" alt="Hazel AgriTrack" className="h-full w-full object-cover" />
         </div>
         <CardTitle className="font-serif text-3xl">{mode === "register" ? "Create account" : "Welcome back"}</CardTitle>
       </CardHeader>
